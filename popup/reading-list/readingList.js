@@ -2,14 +2,14 @@ import * as storage from '../../modules/chrome/storage.mjs'
 import * as generator from './readingItemGenerator.js'
 import * as action from '../action.js'
 import * as filter from '../filter.js'
-import { applyFaviconFallback } from '../../modules/favicon.mjs'
+import { applySiteFavicon } from '../../modules/favicon.mjs'
 
 const readingList = $('#reading-list')
 
 export async function setup () {
     resetEventListeners()
     await initDomFromStorage()
-    setupFaviconFallbacks()
+    loadSiteFavicons()
     setupItemHoverBehavior()
     activeFirstLi()
     updateStateOnMouseMove()
@@ -37,9 +37,16 @@ async function initDomFromStorage () {
     readingList.children().slice(0, oldReadingItemsLength).remove()
 }
 
-function setupFaviconFallbacks () {
-    readingList.find('img').on('error', ({ currentTarget }) => {
-        applyFaviconFallback(currentTarget)
+function loadSiteFavicons () {
+    readingList.find('img[data-site-favicon-src]').each((_, image) => {
+        const siteFaviconSrc = image.dataset.siteFaviconSrc
+        if (!siteFaviconSrc) return
+
+        const siteFavicon = new Image()
+        siteFavicon.onload = () => {
+            applySiteFavicon(image, siteFavicon.src)
+        }
+        siteFavicon.src = siteFaviconSrc
     })
 }
 

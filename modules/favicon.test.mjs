@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
-    applyFaviconFallback,
-    getSiteFaviconFallbackUrl,
+    applySiteFavicon,
+    getChromeFaviconUrl,
     getSiteFaviconUrl,
 } from './favicon.mjs'
 
@@ -34,29 +34,40 @@ describe('site favicon URL', () => {
         expect(getSiteFaviconUrl('chrome://settings')).toBe('')
     })
 
-    test('creates a sharp local letter fallback', () => {
-        const fallbackUrl = getSiteFaviconFallbackUrl(
-            'https://www.local.example/article'
+    test('creates an immediate Chrome favicon URL', () => {
+        expect(getChromeFaviconUrl(
+            'https://local.example/article',
+            'extension-id'
+        )).toBe(
+            'chrome-extension://extension-id/_favicon/' +
+            '?pageUrl=https%3A%2F%2Flocal.example%2Farticle&size=32'
         )
-        const svg = decodeURIComponent(fallbackUrl.split(',')[1])
-
-        expect(fallbackUrl).toStartWith('data:image/svg+xml,')
-        expect(svg).toContain('width="32" height="32"')
-        expect(svg).toContain('>L</text>')
     })
 
-    test('applies the fallback once and preserves selection restoration', () => {
+    test('applies a loaded site favicon', () => {
         const image = {
-            src:     'https://t0.gstatic.com/faviconV2',
+            src:     'chrome-extension://extension-id/_favicon/',
+            dataset: {},
+        }
+
+        expect(applySiteFavicon(image, 'https://t0.gstatic.com/faviconV2'))
+            .toBe(true)
+        expect(image.src).toBe('https://t0.gstatic.com/faviconV2')
+    })
+
+    test('keeps the delete icon visible while updating its restoration URL', () => {
+        const image = {
+            src:     'chrome-extension://extension-id/icons/delete.svg',
             dataset: {
-                faviconFallback: 'data:image/svg+xml,fallback',
-                faviconSrc:      'https://t0.gstatic.com/faviconV2',
+                deleteAction: 'true',
+                faviconSrc:   'chrome-extension://extension-id/_favicon/',
             },
         }
 
-        expect(applyFaviconFallback(image)).toBe(true)
-        expect(image.src).toBe('data:image/svg+xml,fallback')
-        expect(image.dataset.faviconSrc).toBe('data:image/svg+xml,fallback')
-        expect(applyFaviconFallback(image)).toBe(false)
+        applySiteFavicon(image, 'https://t0.gstatic.com/faviconV2')
+
+        expect(image.src).toContain('delete.svg')
+        expect(image.dataset.faviconSrc)
+            .toBe('https://t0.gstatic.com/faviconV2')
     })
 })

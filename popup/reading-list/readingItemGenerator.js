@@ -1,5 +1,5 @@
 import {
-    getSiteFaviconFallbackUrl,
+    getChromeFaviconUrl,
     getSiteFaviconUrl,
 } from '../../modules/favicon.mjs'
 
@@ -74,9 +74,15 @@ export function renderLiFrom (page, {
     isLocalOverflow = false,
     hoverMode = 'details',
 } = {}) {
+    const chromeFaviconUrl = getChromeFaviconUrl(
+        page.url,
+        chrome.runtime.id
+    )
+    const siteFaviconUrl = getSiteFaviconUrl(page.url)
+
     return `
       <li id=${page.date}${isLocalOverflow ? ' class="local-overflow"' : ''}>
-        <img src="${getSiteFaviconUrl(page.url) || page.favIconUrl}" data-favicon-fallback="${getSiteFaviconFallbackUrl(page.url)}" alt="">
+        <img src="${chromeFaviconUrl || page.favIconUrl}" data-site-favicon-src="${siteFaviconUrl}" alt="">
         <a href="${page.url}"${getTooltipAttribute()} class="${getTextClass()}" tabindex="-1">${getTitleContent()}</a>
         ${getVideoPercent() || getScrollPercent()}
       </li>
