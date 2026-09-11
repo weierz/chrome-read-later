@@ -1,0 +1,93 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Options save regression tests</title>
+<pre id="results">Running…</pre>
+<iframe title="Options under test" style="width:400px;height:650px"></iframe>
+<script type="module">
+// Serve from the repository root. Uses the actual options page with delayed,
+// mocked Chrome storage; no installed extension data is read or changed.
+function mockChrome() {
+    const state = window.testState = { writes: [], failures: 0 }
+    const area = name => {
+        const data = {}
+        return {
+            QUOTA_BYTES: 102400, MAX_ITEMS: 512,
+            get(key, callback) {
+                callback(structuredClone(key == null ? data :
+                    (key in data ? { [key]: data[key] } : {})))
+            },
+            set(value, callback) {
+                const snapshot = structuredClone(value)
+                setTimeout(() => {
+                    if (name === 'local' && state.failures) {
+                        state.failures--
+                        chrome.runtime.lastError = { message: 'Test write failure' }
+                        callback()
+                        delete chrome.runtime.lastError
+                        return
+                    }
+                    Object.assign(data, snapshot)
+                    if (name === 'sync') state.writes.push(snapshot.options)
+                    callback()
+                }, 100)
+            },
+            remove(keys, callback) {
+                for (const key of [].concat(keys)) delete data[key]
+                callback()
+            },
+            getBytesInUse(key, callback) { callback(0) },
+        }
+    }
+    window.chrome = { runtime: {}, storage: {
+        local: area('local'), sync: area('sync'), session: area('session'),
+    } }
+}
+const frame = document.querySelector('iframe')
+const results = []
+const check = (value, label) => {
+    if (!value) throw new Error(label)
+    results.push('PASS: ' + label)
+}
+const waitFor = async condition => {
+    const deadline = Date.now() + 5000
+    while (!condition()) {
+        if (Date.now() > deadline) throw new Error('Timed out waiting for options')
+        await new Promise(resolve => setTimeout(resolve, 20))
+    }
+}
+try {
+    const html = await (await fetch('../options/options.html')).text()
+    const base = new URL('../options/', location.href).href
+    frame.srcdoc = html.replace('<head>', `<head><base href="${base}"><script>(${mockChrome})();<\/script>`)
+    await new Promise(resolve => frame.onload = resolve)
+    const w = frame.contentWindow, d = frame.contentDocument
+    await waitFor(() => d.querySelector('#itemHoverMode').value === 'details')
+    const first = d.querySelector('#itemNewTab'), second = d.querySelector('#keepSavedTab')
+    const status = d.querySelector('#optionsStatus')
+    const top = (d.querySelector('#general').getBoundingClientRect().top + w.scrollY)
+    first.focus()
+    first.click()
+    check(!first.disabled && !second.disabled, 'Saving does not disable or dim the form')
+    check(d.activeElement === first, 'Saving preserves keyboard focus')
+    check((d.querySelector('#general').getBoundingClientRect().top + w.scrollY) === top, 'Save status does not shift the settings layout')
+    second.click()
+    first.click()
+    await waitFor(() => status.textContent === 'Saved')
+    const saved = w.testState.writes.at(-1)
+    check(saved.itemNewTab === false && saved.keepSavedTab === true, 'Rapid edits persist the latest values')
+    check(first.checked === false && second.checked === true, 'Older save results do not overwrite the form')
+    check(w.testState.writes.length === 3, 'All queued saves complete in order')
+    w.testState.failures = 1
+    second.click()
+    await waitFor(() => status.textContent === 'Could not save these options.')
+    check(second.checked === true && !second.disabled, 'Failed write restores the previous value without locking controls')
+    second.click()
+    await waitFor(() => status.textContent === 'Saved')
+    check(w.testState.writes.at(-1).keepSavedTab === false, 'A failed write does not block subsequent saves')
+    await waitFor(() => status.textContent === '')
+    check((d.querySelector('#general').getBoundingClientRect().top + w.scrollY) === top, 'Clearing save status does not shift the settings layout')
+    document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
+} catch (error) {
+    document.querySelector('#results').textContent = results.join('\n') + '\nFAIL: ' + error.stack
+}
+</script>

@@ -309,6 +309,12 @@ input:disabled {
     font-size: 12px;
 }
 
+#optionsStatus {
+    display: block;
+    min-height: 18px;
+    line-height: 18px;
+}
+
 .status-text.success {
     color: var(--success);
 }
