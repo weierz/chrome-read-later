@@ -22,7 +22,7 @@ function init () {
         : ''
 
     $('#status-bar').append(`
-     <li id="count" tabindex="0" aria-label="Reading list count">
+     <li id="count" aria-label="Reading list count">
         <span id="row">0</span>:<span id="total">0</span>
      </li>
      ${archive}

@@ -41,6 +41,7 @@ try {
     setupTooltips()
     await readingList.setup()
     statusBar.setup()
+    check(document.querySelector('#count').tabIndex === -1, 'Reading-list count is not focusable')
     const options = document.querySelector('button#options')
     check(!!options, 'Options is a native button')
     for (const key of ['Enter', ' ', 'Backspace', 'd', 'ArrowDown']) {
