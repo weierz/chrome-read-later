@@ -3,6 +3,9 @@
     z-index: 1000;
     box-sizing: border-box;
     max-width: min(320px, calc(100vw - 16px));
+    max-height: calc(100vh - 16px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 6px 10px;
     border: 1px solid #d8cfc5;
     border-radius: 6px;
@@ -20,6 +23,7 @@
 }
 
 .tooltip-popup.visible {
+    pointer-events: auto;
     opacity: 1;
     transform: translateY(0);
     visibility: visible;

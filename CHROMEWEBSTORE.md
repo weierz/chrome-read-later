@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Read Later
 
-Last updated: 2026-09-10
+Last updated: 2026-09-11
 
 ## Store listing
 
@@ -45,6 +45,7 @@ The dashboard discloses Web history, User activity, and Website content; remote 
 
 | Version | Date | Changes | Status |
 | --- | --- | --- | --- |
+| Unreleased | 2026-09-11 | Status-bar buttons support Enter and Space without opening the selected article. Long tooltips fit the viewport, support scrolling and pointer/focus transfer, and dismiss with Escape. | Local changes; 65 unit tests and 9 isolated browser regression checks passed; native Enter/Space activation verified. |
 | 9.2.0 | 2026-09-10 | Hybrid sync/local overflow, combined reading list and export, automatic promotion, storage settings, and quota regression tests. | Submitted for review; automatic publication after approval enabled |
 | 9.1.0 | 2025-12-12 | Previous store release; date from dashboard. | Published |
 

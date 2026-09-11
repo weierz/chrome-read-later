@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Tooltip and status-bar regression tests</title>
+<link rel="stylesheet" href="../popup/popup.css">
+<style>body { width: 400px; } #results { white-space: pre-wrap; padding: 16px; } #long-tooltip { margin: 16px; }</style>
+<script src="../modules/libraries/jquery.min.js"></script>
+<script src="../modules/libraries/he.min.js"></script>
+<ul id="reading-list"></ul>
+<ul id="status-bar"></ul>
+<button id="long-tooltip">Long tooltip test</button>
+<pre id="results">Running…</pre>
+<script type="module">
+// Run with a static server at the repository root. All Chrome APIs are mocked;
+// this fixture cannot change the installed extension or its saved pages.
+const calls = []
+const page = { url: 'https://example.com/test', title: 'Saved article', date: 1,
+    scroll: { top: 0 }, video: {}, favIconUrl: '/icons/logo-orange48x48.png' }
+const area = data => ({ get(key, callback) {
+    callback(key == null ? data : (key in data ? { [key]: data[key] } : {}))
+} })
+window.chrome = {
+    storage: { sync: area({ [page.url]: page }), local: area({}), session: area({}) },
+    runtime: { getURL: path => new URL('/' + path, location.href).href,
+        sendMessage: message => calls.push(message) },
+    tabs: { create: (tab, callback) => { calls.push(tab); callback({ id: 1 }) } },
+}
+window.options = { archiveMode: true, itemNewTab: true }
+window.localOverflowUrls = new Set()
+window.isHidingLi = false
+window.lastKey = ''
+const results = []
+const check = (condition, label) => {
+    if (!condition) throw new Error(label)
+    results.push('PASS: ' + label)
+}
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms))
+try {
+    const readingList = await import('../popup/reading-list/readingList.js')
+    const statusBar = await import('../popup/status-bar/statusBar.js')
+    const { setupTooltips } = await import('../modules/tooltip.mjs')
+    setupTooltips()
+    await readingList.setup()
+    statusBar.setup()
+    const options = document.querySelector('button#options')
+    check(!!options, 'Options is a native button')
+    for (const key of ['Enter', ' ', 'Backspace', 'd', 'ArrowDown']) {
+        options.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+    }
+    check(calls.length === 0, 'Focused controls do not invoke reading-list shortcuts')
+    options.click()
+    options.querySelector('img').click()
+    check(calls.length === 2 && calls.every(call => call.url?.endsWith('/options/options.html')),
+        'Button and nested icon clicks both open Options without deleting an article')
+    calls.length = 0
+    const trigger = document.querySelector('#long-tooltip')
+    trigger.dataset.tooltip = Array.from({ length: 100 }, (_, i) => 'Detail line ' + i).join('\n')
+    trigger.focus()
+    await wait(30)
+    const tooltip = document.querySelector('#project-tooltip')
+    const rect = tooltip.getBoundingClientRect()
+    check(rect.top >= 0 && rect.bottom <= innerHeight, 'Long tooltip stays inside viewport')
+    check(tooltip.scrollHeight > tooltip.clientHeight, 'Long tooltip content can overflow internally')
+    tooltip.focus()
+    await wait(10)
+    check(tooltip.classList.contains('visible'), 'Moving keyboard focus into tooltip keeps it open')
+    tooltip.scrollTop = 100
+    await wait(30)
+    check(tooltip.scrollTop > 0 && tooltip.classList.contains('visible'), 'Scrolling tooltip keeps it open')
+    tooltip.blur()
+    trigger.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    await wait(420)
+    trigger.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
+    await wait(50)
+    tooltip.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    await wait(230)
+    check(tooltip.classList.contains('visible'), 'Pointer can cross gap into tooltip')
+    tooltip.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    check(!tooltip.classList.contains('visible'), 'Escape dismisses tooltip')
+    document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
+    // Native keyboard smoke test: focus Options and press Enter or Space.
+    // The on-screen counter should increment without a saved article disappearing.
+    document.addEventListener('click', () => {
+        document.querySelector('#results').dataset.actionCalls = String(calls.length)
+    })
+} catch (error) {
+    document.querySelector('#results').textContent = results.join('\n') + '\nFAIL: ' + error.stack
+}
+</script>

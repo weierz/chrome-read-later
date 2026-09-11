@@ -86,6 +86,7 @@ function doActionOnMouseClick () {
 
 function doActionOnBodyKeyDown () {
     $('body').on('keydown', event => {
+        if (event.target.closest('#status-bar, .tooltip-popup')) return
         if (event.key.includes('Arrow')) event.preventDefault()
         const keyBinding = filter.getKeyBinding(event)
         const keyAction = filter.getKeyAction(keyBinding)

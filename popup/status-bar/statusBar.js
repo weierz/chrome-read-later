@@ -6,7 +6,7 @@ export function setup () {
     action.updateRowNumber()
     action.updateTotalNumber()
     $('#status-bar').on('click', event => {
-        const clickType = filter.getClickType(event, 'statusBar')
+        const clickType = event.target.closest('button')?.id
         const clickAction = filter.getClickAction(clickType)
         clickAction && clickAction()
     })
@@ -14,9 +14,10 @@ export function setup () {
 
 function init () {
     const archive = window.options?.archiveMode
-        ? `<li tabindex="0" data-tooltip="Open reading list archive"
+        ? `<li><button type="button" id="archive" data-tooltip="Open reading list archive"
                aria-label="Open reading list archive">
-              <img id="archive" src="../../icons/archive.svg">
+              <img src="../../icons/archive.svg" alt="">
+           </button>
            </li>`
         : ''
 
@@ -25,13 +26,15 @@ function init () {
         <span id="row">0</span>:<span id="total">0</span>
      </li>
      ${archive}
-     <li tabindex="0" data-tooltip="Options"
+     <li><button type="button" id="options" data-tooltip="Options"
          aria-label="Options">
-        <img id="options" src="../../icons/options.svg">
+        <img src="../../icons/options.svg" alt="">
+     </button>
      </li>
-     <li tabindex="0"
+     <li><button type="button" id="question"
          data-tooltip="Help and feedback" aria-label="Help and feedback">
-        <img id="question" src="../../icons/question.svg"> 
+        <img src="../../icons/question.svg" alt="">
+     </button>
      </li>
   `)
 }

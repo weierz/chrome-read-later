@@ -45,6 +45,24 @@
     height: 16px;
 }
 
+#status-bar button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+#status-bar button:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
+}
+
 #status-bar #question {
     margin-right: 0;
 }
