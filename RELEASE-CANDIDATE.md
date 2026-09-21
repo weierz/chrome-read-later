@@ -1,4 +1,4 @@
-# Read Later 9.2.1
+# Read Later 9.3.0
 
 Branch: `codex/05-reading-list-ui`
 
