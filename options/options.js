@@ -4,6 +4,7 @@ import { setupTooltips } from '../modules/tooltip.mjs'
 import { applyFontPreference } from '../modules/appearance.mjs'
 import {
     parseReadingList,
+    parseReadingListUrl,
     serializeReadingList,
 } from './readingListFormat.mjs'
 
@@ -293,11 +294,12 @@ async function importItems (content) {
                 throw new Error('Missing required field: url or title')
             }
 
+            const url = parseReadingListUrl(imported.url)
             const page = {
-                url:        imported.url,
+                url,
                 title:      imported.title,
-                favIconUrl: getSiteFaviconUrl(imported.url)
-                    || `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(imported.url)}&size=32`,
+                favIconUrl: getSiteFaviconUrl(url)
+                    || `chrome-extension://${chrome.runtime.id}/_favicon/?pageUrl=${encodeURIComponent(url)}&size=32`,
                 date:       imported.timestamp
                     ? new Date(imported.timestamp).getTime()
                     : Date.now(),
