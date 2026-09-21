@@ -1,6 +1,7 @@
 import * as storage from '../modules/chrome/storage.mjs'
 import { getSiteFaviconUrl } from '../modules/favicon.mjs'
 import { setupTooltips } from '../modules/tooltip.mjs'
+import { applyFontPreference } from '../modules/appearance.mjs'
 import {
     parseReadingList,
     serializeReadingList,
@@ -132,6 +133,7 @@ async function persistOptions (nextOptions, changeId) {
 
 function readOptions () {
     return {
+        fontFamily:          $('#fontFamily').val(),
         itemNewTab:           $('#itemNewTab').prop('checked'),
         keepSavedTab:         $('#keepSavedTab').prop('checked'),
         itemHoverMode:        $('#itemHoverMode').val(),
@@ -144,6 +146,8 @@ function readOptions () {
 }
 
 function applyOptions (options) {
+    applyFontPreference(options)
+    $('#fontFamily').val(options?.fontFamily ?? 'system')
     $('#itemNewTab').prop('checked', options?.itemNewTab)
     $('#keepSavedTab').prop('checked', options?.keepSavedTab)
     $('#itemHoverMode').val(options?.itemHoverMode)

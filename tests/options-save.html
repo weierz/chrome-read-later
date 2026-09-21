@@ -86,6 +86,25 @@ try {
     check(w.testState.writes.at(-1).keepSavedTab === false, 'A failed write does not block subsequent saves')
     await waitFor(() => status.textContent === '')
     check((d.querySelector('#general').getBoundingClientRect().top + w.scrollY) === top, 'Clearing save status does not shift the settings layout')
+    const font = d.querySelector('#fontFamily')
+    check(font.value === 'system', 'Interface font defaults to the system font')
+    const chooseFont = value => {
+        font.value = value
+        font.dispatchEvent(new w.Event('change', { bubbles: true }))
+    }
+    chooseFont('monospace')
+    await waitFor(() => status.textContent === 'Saved')
+    const local = await new Promise(resolve => w.chrome.storage.local.get('options', resolve))
+    check(local.options.fontFamily === 'monospace', 'Font preference is saved and read back from local storage')
+    check(!Object.hasOwn(w.testState.writes.at(-1), 'fontFamily'), 'Font preference stays specific to this computer')
+    check(w.getComputedStyle(d.body).fontFamily.includes('monospace'), 'The saved font applies to the Options interface')
+    w.testState.failures = 1
+    chooseFont('serif')
+    await waitFor(() => status.textContent === 'Could not save these options.')
+    check(font.value === 'monospace' && w.getComputedStyle(d.body).fontFamily.includes('monospace'), 'Failed font save restores the previous font and selection')
+    chooseFont('system')
+    await waitFor(() => status.textContent === 'Saved')
+    check(w.getComputedStyle(d.body).fontFamily.startsWith('system-ui'), 'System font can be restored')
     document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
 } catch (error) {
     document.querySelector('#results').textContent = results.join('\n') + '\nFAIL: ' + error.stack

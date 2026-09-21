@@ -1,5 +1,6 @@
 import * as runtime from '../modules/chrome/runtime.mjs'
 import * as storage from '../modules/chrome/storage.mjs'
+import { applyFontPreference } from '../modules/appearance.mjs'
 import {
     applyFaviconFallback,
     getSiteFaviconFallbackUrl,
@@ -29,8 +30,12 @@ async function init () {
     bindEvents()
 
     try {
-        archivePages = (await storage.local.sortByLatest())
-            .filter(page => page.url)
+        const [pages, options] = await Promise.all([
+            storage.local.sortByLatest(),
+            storage.getOptions(),
+        ])
+        applyFontPreference(options)
+        archivePages = pages.filter(page => page.url)
         applyFilter()
     } catch (error) {
         console.error('Read Later: unable to load the archive.', error)

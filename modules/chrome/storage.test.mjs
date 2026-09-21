@@ -273,6 +273,67 @@ describe('hybrid reading list storage', () => {
         ).toBeUndefined()
     })
 
+    test('uses the system font by default', async () => {
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+    })
+
+    test('prefers the local font over a synced font', async () => {
+        await storage.local.set({
+            options: { fontFamily: 'monospace', isOptions: true },
+        })
+        await storage.sync.set({
+            options: { fontFamily: 'serif', isOptions: true },
+        })
+
+        expect((await storage.getOptions()).fontFamily).toBe('monospace')
+    })
+
+    test('reads a legacy synced font when no local font is saved', async () => {
+        await storage.sync.set({
+            options: { fontFamily: 'avenir', isOptions: true },
+        })
+
+        expect((await storage.getOptions()).fontFamily).toBe('avenir')
+    })
+
+    test('saves the font locally and removes legacy synced fonts', async () => {
+        await storage.sync.set({
+            options: { fontFamily: 'avenir', isOptions: true },
+        })
+
+        await storage.setOptions({ fontFamily: 'serif' })
+
+        expect((await storage.local.get('options')).options.fontFamily)
+            .toBe('serif')
+        expect((await storage.sync.get('options')).options.fontFamily)
+            .toBeUndefined()
+        expect((await storage.getOptions()).fontFamily).toBe('serif')
+    })
+
+    test('normalizes invalid saved fonts to the system font', async () => {
+        await storage.sync.set({
+            options: { fontFamily: 'unsupported', isOptions: true },
+        })
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+
+        await storage.sync.set({
+            options: { fontFamily: 'serif', isOptions: true },
+        })
+        await storage.local.set({
+            options: { fontFamily: '__proto__', isOptions: true },
+        })
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+    })
+
+    test('normalizes invalid font input before saving', async () => {
+        const result = await storage.setOptions({ fontFamily: { family: 'serif' } })
+
+        expect(result.options.fontFamily).toBe('system')
+        expect((await storage.local.get('options')).options.fontFamily)
+            .toBe('system')
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+    })
+
     test('applies the time range before archiving a new item', async () => {
         const day = 24 * 60 * 60 * 1000
         await storage.setOptions({ archiveRetentionDays: 7 })

@@ -1,6 +1,8 @@
 // For chrome.storage functions:
 // https://developer.chrome.com/extensions/storage
 
+import { normalizeFontFamily } from '../appearance.mjs'
+
 const LOCAL_SAVED_PREFIX = 'saved:'
 export const ARCHIVE_ITEM_LIMIT = 10000
 const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000
@@ -222,6 +224,9 @@ export async function getOptions () {
         selectedItemIconMode: localOptions?.selectedItemIconMode
             ?? syncOptions?.selectedItemIconMode
             ?? 'always',
+        fontFamily: normalizeFontFamily(
+            localOptions?.fontFamily ?? syncOptions?.fontFamily
+        ),
         archiveMode: localOptions?.archiveMode
             ?? syncOptions?.archiveMode
             ?? legacyHistoryMode ?? true,
@@ -241,6 +246,7 @@ export async function getOptions () {
 export async function setOptions (options) {
     const previousOptions = await getOptions()
     const nextOptions = { ...previousOptions, ...options }
+    nextOptions.fontFamily = normalizeFontFamily(nextOptions.fontFamily)
     nextOptions.archiveRetentionDays = Math.max(
         0,
         Number(nextOptions.archiveRetentionDays) || 0
@@ -268,6 +274,7 @@ export async function setOptions (options) {
     delete syncOptions.hybrid
     delete syncOptions.itemHoverMode
     delete syncOptions.selectedItemIconMode
+    delete syncOptions.fontFamily
     delete syncOptions.archiveMode
     delete syncOptions.archiveRetentionDays
     let syncError
