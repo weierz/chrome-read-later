@@ -1,6 +1,10 @@
 import * as runtime from '../modules/chrome/runtime.mjs'
 import * as storage from '../modules/chrome/storage.mjs'
-import { getSiteFaviconUrl } from '../modules/favicon.mjs'
+import {
+    applyFaviconFallback,
+    getSiteFaviconFallbackUrl,
+    getSiteFaviconUrl,
+} from '../modules/favicon.mjs'
 import {
     filterArchivePages,
     getArchiveProgress,
@@ -98,6 +102,8 @@ function createArchiveItem (page) {
     const favicon = document.createElement('img')
     favicon.className = 'item-favicon'
     favicon.src = getSiteFaviconUrl(page.url) || page.favIconUrl
+    favicon.dataset.faviconFallback = getSiteFaviconFallbackUrl(page.url)
+    favicon.addEventListener('error', () => applyFaviconFallback(favicon))
     favicon.alt = ''
     favicon.loading = 'lazy'
 
