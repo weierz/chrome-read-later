@@ -4,6 +4,10 @@ Branch: `codex/05-reading-list-ui`
 
 Reading list presentation and favicon handling. This candidate includes preceding feature branches and committed master `8e6cc7f`, preserving its fixes and appearance. The original dirty master checkout is excluded.
 
+## Version policy
+
+This is a minor increment. New compatible user capabilities use minor; fixes and performance improvements use patch. No incompatible public API or saved-data migration requires a major increment. Earlier local draft numbers were never published.
+
 ## Validate and package
 
 ```sh

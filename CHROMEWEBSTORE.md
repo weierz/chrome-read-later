@@ -21,6 +21,7 @@ The existing detailed description is retained with this introduction:
 
 
 
+
 ## Current local release candidate
 
 - Version: `9.3.0`
@@ -55,6 +56,7 @@ The dashboard discloses Web history, User activity, and Website content; remote 
 ## Version history
 
 - 9.3.0: Unpublished local candidate — Reading list presentation and favicon handling. Review fixes and current master baseline included.
+
 
 
 
