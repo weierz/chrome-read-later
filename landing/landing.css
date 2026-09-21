@@ -36,7 +36,7 @@
   .main-nav { display: flex; align-items: center; gap: 32px; margin-inline-start: auto; }
   .hero { display: grid; grid-template-columns: 1.02fr 1fr; align-items: center; gap: 44px; padding-block: 86px 118px; }
   .hero-copy, .hero-visual { min-inline-size: 0; }
-  .hero-visual { position: relative; padding: 26px 0 78px 10px; }
+  .hero-visual { position: relative; padding: 18px 28px 0; }
   .principles { display: flex; justify-content: space-between; align-items: center; gap: 28px; padding-block: 30px; border-block: 1px solid var(--line); }
   .section-space { padding-block: 108px; }
   .section-intro { text-align: center; }
@@ -76,50 +76,19 @@
   .hero-note .icon { inline-size: 14px; block-size: 14px; color: var(--green); }
   .sun-disc { position: absolute; z-index: -1; inline-size: 325px; block-size: 325px; inset-block-start: -12px; inset-inline-end: -15px; border-radius: 50%; background: repeating-linear-gradient(135deg, #e9b28a66 0 1px, transparent 1px 7px), #f9eee0; }
   .orbit-star { position: absolute; color: var(--orange); font-size: 3.8rem; line-height: 1; inset-inline-end: 0; inset-block-start: -14px; transform: rotate(12deg); }
-  .paper-back { position: absolute; inset: 60px 8px 45px 12px; border: 1px solid #e4dbc9; border-radius: 13px; background: #eeeade; transform: rotate(-6deg); }
-  .reading-preview { position: relative; background: #fff; border: 1px solid #dfdfd6; border-radius: 12px; box-shadow: 0 20px 45px -25px #48402d55, 0 3px 7px #48402d05; transform: rotate(2deg); }
-  .browser-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-block-end: 1px solid #eeeeea; padding: 13px 17px; background: #f7f7f3; border-radius: 12px 12px 0 0; color: #666962; font-size: .61rem; }
-  .browser-bar > .icon { inline-size: 13px; block-size: 13px; }
-  .browser-dots { display: flex; gap: 5px; }
-  .browser-dots i { inline-size: 7px; block-size: 7px; border-radius: 50%; background: #d1d3ca; }
-  .browser-dots i:first-child { background: #e8b29d; }
-  .preview-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 24px 23px 20px; }
-  .preview-heading > div { display: flex; align-items: center; gap: 10px; }
-  .preview-heading h2 { font-size: 1rem; letter-spacing: -.035em; }
-  .item-count { color: #666b5e; font-size: .61rem; background: #f1f2ed; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
-  .reading-items { list-style: none; padding: 0 12px; }
-  .reading-item { display: flex; align-items: center; gap: 13px; padding: 15px 11px; border-radius: 6px; }
-  .reading-item + .reading-item { border-block-start: 1px solid #f1f1ed; }
-  .reading-item.highlighted { background: #fcf3e9; border: 1px solid #f3e6d5; }
-  .article-mark { display: grid; place-items: center; flex-shrink: 0; inline-size: 33px; block-size: 37px; border-radius: 5px; font-family: Georgia, serif; font-size: 1.5rem; }
-  .mark-sun { background: #ebd8b6; color: #856435; }
-  .mark-letter { background: #e2e9db; color: #476039; font-size: 1.65rem; }
-  .mark-video { background: #e3e9ef; color: #57718c; font-size: .75rem; }
-  .mark-leaf { background: #ede1d6; color: #8b6445; font-family: inherit; }
-  .mark-new { background: #fce7db; color: var(--orange); }
-  .article-info { min-inline-size: 0; flex-grow: 1; }
-  .article-title { display: block; font-size: .76rem; font-weight: 600; line-height: 1.5; }
-  .article-source { display: block; color: #676c61; font-size: .59rem; margin-block-start: 2px; }
-  .reading-progress { color: var(--orange); font-size: .69rem; font-weight: 600; }
-  .video-progress { color: #466786; }
-  .progress-track { display: block; background: #ebdfcd; block-size: 3px; border-radius: 2px; margin-block-start: 9px; }
-  .progress-track > span { display: block; block-size: 100%; inline-size: 42%; background: #cf7442; border-radius: inherit; }
-  .item-bookmark { color: #91968a; inline-size: 15px; block-size: 15px; }
-  .preview-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 17px 24px; color: #697060; font-size: .6rem; }
-  .preview-footer > span { display: flex; align-items: center; gap: 6px; }
-  .preview-footer .icon { inline-size: 13px; block-size: 13px; }
-  .sync-dot { inline-size: 5px; block-size: 5px; background: #7a9369; border-radius: 50%; }
-  .preview-save { display: flex; align-items: center; justify-content: center; gap: 7px; inline-size: 100%; min-block-size: 44px; padding: 12px; border: 0; border-block-start: 1px solid #e9eae2; border-radius: 0 0 12px 12px; background: #f7f8f2; font-size: .7rem; font-weight: 600; transition: background 150ms; }
-  .preview-save:hover { background: #ecefe1; }
-  .preview-save .icon { inline-size: 15px; block-size: 15px; }
-  .saved-sample { animation: arrive 220ms ease-out; }
-  .saved-check { color: var(--green); inline-size: 17px; block-size: 17px; }
-  .place-note { position: absolute; inset-block-end: 8px; inset-inline-start: -27px; display: flex; align-items: center; gap: 12px; padding: 14px 19px; border: 1px solid #e5e6dc; border-radius: 8px; background: #fff; box-shadow: 0 8px 25px #393d2510; transform: rotate(-4deg); pointer-events: none; }
-  .place-note > span { padding: 9px; border-radius: 50%; background: #eef2e7; color: #5a7053; }
-  .place-note > div { font-size: .73rem; font-weight: 600; }
-  .place-note small { display: block; font-size: .59rem; color: var(--muted); font-weight: 400; margin-block-start: 1px; }
-  .preview-caption { position: absolute; inset-inline-end: 0; inset-block-end: -13px; color: #686c61; font-size: .58rem; }
-  .preview-caption > span { margin-inline-start: 8px; color: var(--orange); }
+  .product-preview { position: relative; inline-size: min(100%, 410px); margin: 0 auto; }
+  .product-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-block-end: 14px; color: var(--muted); font-size: .72rem; }
+  .screenshot-themes { display: flex; gap: 2px; padding: 3px; border: 1px solid #daddd2; border-radius: 7px; background: #eeeee6; }
+  .screenshot-themes button { min-inline-size: 49px; min-block-size: 38px; padding: 6px 10px; border: 0; border-radius: 4px; background: transparent; color: #62675c; font-size: .7rem; }
+  .screenshot-themes button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 4px #343b231a; font-weight: 600; }
+  .screenshot-themes button:hover { color: var(--orange); }
+  .product-crop { position: relative; aspect-ratio: 806 / 1036; overflow: clip; border: 1px solid #d9dad2; border-radius: 3px; background: #fff; box-shadow: 0 20px 45px -25px #48402d55, 0 3px 7px #48402d10; }
+  /* Focus the original 2560 × 1600 documentation capture on the real popup.
+     The source image is unchanged; both appearance captures use this rectangle. */
+  .product-crop img { position: absolute; inline-size: calc(100% * 2560 / 806); max-inline-size: none; block-size: auto; inset-inline-start: calc(-100% * 1435 / 806); inset-block-start: calc(-100% * 224 / 1036); }
+  .product-caption { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; margin-block-start: 12px; color: var(--muted); font-size: .64rem; }
+  .product-caption a { display: inline-flex; align-items: center; gap: 4px; min-block-size: 36px; text-decoration: underline; text-decoration-color: #c3c4bb; text-underline-offset: 3px; }
+  .product-caption a:hover { color: var(--orange); text-decoration-color: currentColor; }
   .principles p { color: var(--muted); font-size: .75rem; line-height: 1.7; }
   .principles strong { color: var(--ink); font-weight: 500; }
   .principles > span { display: flex; align-items: center; gap: 11px; font-size: .8rem; font-weight: 500; }
@@ -192,7 +161,6 @@
   .site-footer p { font-size: .67rem; color: #686e61; }
   .site-footer nav { display: flex; gap: 24px; margin-inline-start: auto; }
   .site-footer nav a { font-size: .7rem; padding-block: 10px; }
-  @keyframes arrive { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
 }
 
 @layer responsive {
@@ -206,8 +174,7 @@
     .hero-actions { gap: 14px; }
     .hero-actions .text-link { font-size: .73rem; }
     .main-nav { gap: 22px; }
-    .hero-visual { padding-inline-start: 0; }
-    .place-note { inset-inline-start: -8px; }
+    .hero-visual { padding-inline: 14px; }
     .principles { gap: 20px; }
     .principles > span { font-size: .71rem; gap: 8px; }
     .feature-grid { gap: 25px; }
@@ -232,7 +199,6 @@
     .hero-description { max-inline-size: 435px; margin-inline: auto; font-size: 1rem; }
     .hero-actions { gap: 27px; }
     .hero-visual { inline-size: min(470px, 100% - 20px); margin-inline: auto; }
-    .preview-caption { inset-block-end: -13px; }
     .sun-disc { inline-size: 290px; block-size: 290px; }
     .principles { flex-wrap: wrap; gap: 20px 10px; justify-content: center; }
     .principles p { inline-size: 100%; text-align: center; }
@@ -275,24 +241,9 @@
     .hero-actions .button { min-block-size: 50px; font-size: .8rem; padding-inline: 16px; }
     .hero-actions .button .arrow { margin-inline-start: 2px; }
     .hero-note { font-size: .62rem; gap: 7px; }
-    .hero-visual { inline-size: calc(100% - 10px); padding-block-start: 22px; }
+    .hero-visual { inline-size: 100%; padding: 14px 0 0; }
     .sun-disc { inline-size: 240px; block-size: 240px; inset-inline-end: -6px; }
     .orbit-star { font-size: 3rem; inset-inline-end: 0; inset-block-start: -6px; }
-    .preview-heading { padding: 20px 16px 17px; }
-    .preview-heading h2 { font-size: .88rem; }
-    .preview-heading > div { gap: 8px; }
-    .reading-items { padding-inline: 8px; }
-    .reading-item { padding: 13px 9px; gap: 10px; }
-    .article-title { font-size: .68rem; }
-    .article-source { font-size: .54rem; }
-    .article-mark { inline-size: 29px; block-size: 33px; }
-    .reading-progress { font-size: .62rem; }
-    .preview-footer { padding-inline: 18px; }
-    .place-note { padding: 11px 12px; gap: 9px; inset-inline-start: -5px; }
-    .place-note > span { padding: 7px; }
-    .place-note > div { font-size: .68rem; }
-    .place-note small { font-size: .54rem; }
-    .preview-caption { inset-inline: 0; text-align: center; font-size: .53rem; }
     .principles { display: grid; grid-template-columns: 1fr; gap: 20px; padding-block: 28px; }
     .principles p { margin-block-end: 3px; font-size: .8rem; }
     .principles > span { margin: 0; justify-content: center; font-size: .8rem; }

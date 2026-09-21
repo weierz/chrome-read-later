@@ -1,21 +1,24 @@
-// This sample stays on the page and never reads or changes the extension's data.
-const saveButton = document.querySelector('#preview-save');
-const savedSample = document.querySelector('#saved-sample');
-const itemCount = document.querySelector('#item-count');
-const previewStatus = document.querySelector('#preview-status');
-const saveLabel = saveButton.querySelector('span');
-const saveIcon = saveButton.querySelector('use');
+const screenshot = document.querySelector('#product-screenshot');
+const fullScreenshot = document.querySelector('#full-screenshot');
+const themeControls = document.querySelector('.screenshot-themes');
+const themeButtons = themeControls.querySelectorAll('button');
 
-saveButton.hidden = false;
-document.querySelector('#try-hint').hidden = false;
+const screenshots = {
+  light: 'landing/images/read-later-light.png',
+  dark: 'landing/images/read-later-dark.png',
+};
 
-saveButton.addEventListener('click', () => {
-  const isSaved = savedSample.hidden;
-  savedSample.hidden = !isSaved;
-  itemCount.textContent = isSaved ? '5 items' : '4 items';
-  saveLabel.textContent = isSaved ? 'Saved! Reset preview' : 'Try saving a page';
-  saveIcon.setAttribute('href', isSaved ? '#icon-check' : '#icon-plus');
-  previewStatus.textContent = isSaved
-    ? 'Sample page saved. Your preview reading list now has 5 items. No real pages or extension data were changed.'
-    : 'Preview reset. Your sample reading list has 4 items.';
-});
+themeControls.hidden = false;
+
+for (const button of themeButtons) {
+  button.addEventListener('click', () => {
+    const theme = button.dataset.screenshotTheme;
+    screenshot.src = screenshots[theme];
+    screenshot.alt = `Read Later in ${theme} appearance, showing the compact saved-page list, site icons, orange reading percentages, and the count and controls along the bottom.`;
+    fullScreenshot.href = screenshots[theme];
+
+    for (const themeButton of themeButtons) {
+      themeButton.setAttribute('aria-pressed', String(themeButton === button));
+    }
+  });
+}

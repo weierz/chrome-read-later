@@ -57,46 +57,22 @@
       <div class="hero-visual">
         <div class="sun-disc" aria-hidden="true"></div>
         <div class="orbit-star" aria-hidden="true">✳</div>
-        <div class="paper-back" aria-hidden="true"></div>
-        <section class="reading-preview" aria-labelledby="preview-title">
-          <div class="browser-bar" aria-hidden="true"><span class="browser-dots"><i></i><i></i><i></i></span><span>A little room for later</span><svg class="icon"><use href="#icon-plus"/></svg></div>
-          <div class="preview-heading">
-            <div><img src="icons/logo-orange128x128.png" width="23" height="23" alt=""><h2 id="preview-title">Your reading list</h2></div>
-            <span class="item-count" id="item-count">4 items</span>
+        <figure class="product-preview">
+          <figcaption class="product-heading">
+            <span>Read Later in Chrome</span>
+            <div class="screenshot-themes" role="group" aria-label="Screenshot appearance" hidden>
+              <button type="button" data-screenshot-theme="light" aria-pressed="true" aria-controls="product-screenshot">Light</button>
+              <button type="button" data-screenshot-theme="dark" aria-pressed="false" aria-controls="product-screenshot">Dark</button>
+            </div>
+          </figcaption>
+          <div class="product-crop">
+            <img id="product-screenshot" src="landing/images/read-later-light.png" width="2560" height="1600" fetchpriority="high" alt="Read Later in light appearance, showing the compact saved-page list, site icons, orange reading percentages, and the count and controls along the bottom.">
           </div>
-          <ul class="reading-items" role="list">
-            <li class="reading-item highlighted">
-              <span class="article-mark mark-sun" aria-hidden="true">✳</span>
-              <div class="article-info"><span class="article-title">The art of paying attention</span><span class="article-source">A little everyday inspiration</span><span class="progress-track" aria-hidden="true"><span></span></span></div>
-              <span class="reading-progress">42%<span class="sr-only"> read</span></span>
-            </li>
-            <li class="reading-item">
-              <span class="article-mark mark-letter" aria-hidden="true">a.</span>
-              <div class="article-info"><span class="article-title">A small guide to big ideas</span><span class="article-source">Something to think about</span></div>
-              <svg class="icon item-bookmark" aria-hidden="true"><use href="#icon-bookmark"/></svg>
-            </li>
-            <li class="reading-item">
-              <span class="article-mark mark-video" aria-hidden="true">▶</span>
-              <div class="article-info"><span class="article-title">Making space for creative work</span><span class="article-source">A video worth coming back to</span></div>
-              <span class="reading-progress video-progress">18%<span class="sr-only"> watched</span></span>
-            </li>
-            <li class="reading-item">
-              <span class="article-mark mark-leaf" aria-hidden="true">↗</span>
-              <div class="article-info"><span class="article-title">Take the scenic route</span><span class="article-source">For your next slow Sunday</span></div>
-              <svg class="icon item-bookmark" aria-hidden="true"><use href="#icon-bookmark"/></svg>
-            </li>
-            <li class="reading-item saved-sample" id="saved-sample" hidden>
-              <span class="article-mark mark-new" aria-hidden="true"><svg class="icon"><use href="#icon-bookmark"/></svg></span>
-              <div class="article-info"><span class="article-title">Your next good read</span><span class="article-source">Saved for whenever you're ready</span></div>
-              <svg class="icon saved-check" aria-hidden="true"><use href="#icon-check"/></svg>
-            </li>
-          </ul>
-          <div class="preview-footer"><span><span class="sync-dot" aria-hidden="true"></span>A little less on your mind</span><svg class="icon" aria-hidden="true"><use href="#icon-sync"/></svg></div>
-          <button class="preview-save" id="preview-save" type="button" hidden><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg><span>Try saving a page</span></button>
-        </section>
-        <div class="place-note" aria-hidden="true"><span><svg class="icon"><use href="#icon-position"/></svg></span><div>Your place, remembered.<small>Pick up right where you left off.</small></div></div>
-        <p class="preview-caption">A simplified preview with sample reads. <span id="try-hint" hidden>Give it a try ↑</span></p>
-        <p class="sr-only" id="preview-status" role="status"></p>
+          <div class="product-caption">
+            <span>Actual extension screenshot</span>
+            <a id="full-screenshot" href="landing/images/read-later-light.png" target="_blank" rel="noopener">View full screenshot <span aria-hidden="true">↗</span><span class="sr-only"> (opens in a new tab)</span></a>
+          </div>
+        </figure>
       </div>
     </section>
 
