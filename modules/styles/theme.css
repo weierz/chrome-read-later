@@ -1,0 +1,55 @@
+/* Shared extension palette, aligned with the Read Later landing page. */
+:root {
+    color-scheme: light dark;
+    --accent: #c44421;
+    --accent-hover: #aa3618;
+    --accent-soft: #f9e7dc;
+    --accent-contrast: #ffffff;
+    --background: #faf9f6;
+    --surface: #fffdf9;
+    --surface-subtle: #f0f1eb;
+    --border: #e4e4dc;
+    --border-strong: #818979;
+    --text: #292c28;
+    --muted: #666962;
+    --success: #52664a;
+    --warning: #855824;
+    --error: #b43b30;
+    --video: #3f6587;
+    --icon-filter: opacity(0.7);
+    --font-ui: "Avenir Next", Avenir, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+    accent-color: var(--accent);
+}
+
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+::selection {
+    background: var(--accent-soft);
+    color: var(--text);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --accent: #f49b78;
+        --accent-hover: #ffc0a2;
+        --accent-soft: #43352d;
+        --accent-contrast: #242622;
+        --background: #242622;
+        --surface: #2d302a;
+        --surface-subtle: #34382f;
+        --border: #444a3f;
+        --border-strong: #89937f;
+        --text: #f1f1e8;
+        --muted: #b8bdb0;
+        --success: #aec69c;
+        --warning: #dbb68a;
+        --error: #f3a296;
+        --video: #9bbbda;
+        --icon-filter: invert(84%) sepia(8%) saturate(310%)
+            hue-rotate(40deg) brightness(94%) contrast(87%);
+    }
+}

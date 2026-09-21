@@ -1,23 +1,27 @@
+@import "../modules/styles/theme.css";
 @import "../modules/styles/tooltip.css";
 @import "header/header.css";
 @import "reading-list/reading-list.css";
 @import "status-bar/status-bar.css";
 
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
 body {
     width: 400px;
+    background: var(--background);
+    color: var(--text);
+    font: 14px/1.5 var(--font-ui);
+    -webkit-font-smoothing: antialiased;
 }
 
 ::-webkit-scrollbar {
     display: none;
 }
 
-@media screen and (prefers-color-scheme: dark) {
-    html {
-        background-color: #202124;
-    }
+html {
+    background: var(--background);
 }

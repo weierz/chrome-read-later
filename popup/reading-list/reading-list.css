@@ -1,30 +1,36 @@
 #reading-list {
-    max-height: 510px;
+    max-height: 492px;
     overflow-y: scroll;
     font-size: 14px;
     list-style: none;
+    padding: 6px;
 }
 
 #reading-list li {
     display: flex;
     align-items: center;
-    padding: 0 15px;
-    line-height: 30px;
+    padding: 0 10px;
+    line-height: 32px;
+    border-radius: 5px;
 }
 
 #reading-list li.active {
-    background-color: #c8c8c9;
+    background: var(--accent-soft);
+    box-shadow: inset 2px 0 var(--accent);
+}
+
+#reading-list li:focus-within {
+    background: var(--accent-soft);
 }
 
 #reading-list a {
     min-width: 0;
     flex: 1;
-    outline: none;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     text-decoration: none;
-    color: #202124;
+    color: var(--text);
     cursor: default;
 }
 
@@ -61,11 +67,11 @@
 }
 
 #reading-list a.url-only {
-    color: gray;
+    color: var(--muted);
 }
 
 #reading-list li.local-overflow a {
-    color: #8a562f;
+    color: var(--warning);
 }
 
 #reading-list img {
@@ -74,6 +80,7 @@
     width: 16px;
     height: 16px;
     cursor: pointer;
+    box-sizing: content-box;
 }
 
 #reading-list .percent {
@@ -81,36 +88,20 @@
     font-weight: 500;
     padding-left: 5px;
     cursor: default;
+    font-variant-numeric: tabular-nums;
 }
 
 #reading-list .scroll {
-    color: #f05f00cc;
+    color: var(--accent);
+}
+
+#reading-list li.active .scroll,
+#reading-list li:focus-within .scroll {
+    color: var(--accent-hover);
 }
 
 #reading-list .video {
-    color: #0969dadd;
-}
-
-@media screen and (prefers-color-scheme: dark) {
-    #reading-list li.active {
-        background-color: #444547;
-    }
-
-    #reading-list a {
-        color: #abb2bf;
-    }
-
-    #reading-list li.local-overflow a {
-        color: #d4a373;
-    }
-
-    #reading-list .scroll {
-        color: #f05f00;
-    }
-
-    #reading-list .video {
-        color: #76a2f0;
-    }
+    color: var(--video);
 }
 
 @media screen and (prefers-reduced-motion: reduce) {

@@ -1,7 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="utf-8">
+    <meta name="color-scheme" content="light dark">
+    <title>Read Later</title>
     <link rel="stylesheet" href="popup.css">
     <script src="../modules/libraries/jquery.min.js" crossorigin="anonymous"></script>
     <script src="../modules/libraries/he.min.js" crossorigin="anonymous"></script>
@@ -9,9 +12,17 @@
 </head>
 
 <body>
-<header></header>
-<ul id="reading-list"></ul>
-<ul id="status-bar"></ul>
+<header class="popup-header">
+    <img src="../icons/logo-orange48x48.png" alt="" width="24" height="24">
+    <h1>read later<span>.</span></h1>
+    <span class="popup-label">Reading list</span>
+</header>
+<main aria-label="Reading list">
+    <ul id="reading-list"></ul>
+</main>
+<footer>
+    <ul id="status-bar"></ul>
+</footer>
 </body>
 
 </html>

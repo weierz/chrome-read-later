@@ -1,12 +1,13 @@
 #status-bar {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 4px;
     box-sizing: border-box;
     list-style-type: none;
-    padding: 6px 12px;
-    height: 32px;
-    background-color: white;
+    padding: 6px 10px 6px 16px;
+    height: 44px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
     width: 100%;
 }
 
@@ -14,9 +15,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 20px;
+    height: 30px;
     padding: 0;
-    color: gray;
+    color: var(--muted);
     font-size: 12px;
 }
 
@@ -28,14 +29,16 @@
 }
 
 #status-bar li a:hover {
-    color: black;
+    color: var(--accent);
 }
 
 #status-bar #count {
-    color: #f05f00cc;
+    color: var(--accent);
     cursor: default;
     letter-spacing: 1px;
     margin-right: auto; /* Push other items to the end. */
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
 #status-bar img {
@@ -43,46 +46,33 @@
     cursor: pointer;
     width: 16px;
     height: 16px;
+    filter: var(--icon-filter);
 }
 
 #status-bar button {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 30px;
+    height: 30px;
     padding: 0;
     border: 0;
+    border-radius: 6px;
     background: transparent;
     color: inherit;
     cursor: pointer;
 }
 
 #status-bar button:focus-visible {
-    outline: 2px solid currentColor;
-    outline-offset: 2px;
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    background: var(--accent-soft);
+}
+
+#status-bar button:hover {
+    background: var(--accent-soft);
 }
 
 #status-bar #question {
     margin-right: 0;
-}
-
-@media screen and (prefers-color-scheme: dark) {
-    #status-bar {
-        background-color: #202124;
-    }
-
-    #status-bar li a:hover {
-        color: #FAFCFE;
-    }
-
-    #status-bar #count {
-        color: #f05f00;
-    }
-
-    #status-bar img {
-        /* #adbac7 */
-        filter: invert(78%) sepia(17%) saturate(217%) hue-rotate(169deg) brightness(92%) contrast(89%);
-    }
-
 }

@@ -7,12 +7,12 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 6px 10px;
-    border: 1px solid #d8cfc5;
+    border: 1px solid var(--border-strong);
     border-radius: 6px;
-    background-color: #f5f0ea;
+    background-color: var(--surface);
     box-shadow: 0 4px 12px #443c352e;
-    color: #443c35;
-    font: 400 11px/16px system-ui, sans-serif;
+    color: var(--text);
+    font: 400 11px/16px var(--font-ui);
     opacity: 0;
     overflow-wrap: anywhere;
     pointer-events: none;
@@ -35,15 +35,6 @@
 
 .tooltip-popup.visible[data-placement="bottom"] {
     transform: translateY(0);
-}
-
-@media screen and (prefers-color-scheme: dark) {
-    .tooltip-popup {
-        border-color: #bfb5aa;
-        background-color: #ded6cd;
-        box-shadow: 0 4px 12px #00000066;
-        color: #3b342e;
-    }
 }
 
 @media screen and (prefers-reduced-motion: reduce) {
