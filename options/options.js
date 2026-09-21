@@ -1,6 +1,7 @@
 import * as storage from '../modules/chrome/storage.mjs'
 import { getSiteFaviconUrl } from '../modules/favicon.mjs'
 import { setupTooltips } from '../modules/tooltip.mjs'
+import { applyFontPreference } from '../modules/appearance.mjs'
 import {
     parseReadingList,
     serializeReadingList,
@@ -9,6 +10,8 @@ import {
 let currentOptions
 let exportItems = []
 let optionsStatusTimer
+let optionsSaveQueue = Promise.resolve()
+let optionsChangeId = 0
 
 $(async () => {
     setupTooltips()
@@ -73,52 +76,64 @@ async function loadOptions () {
     }
 }
 
-async function saveOptions () {
-    const previousOptions = currentOptions
+function saveOptions () {
     const nextOptions = readOptions()
-    const $controls = $('.option-control')
-
-    $controls.prop('disabled', true)
+    const changeId = ++optionsChangeId
+    clearTimeout(optionsStatusTimer)
+    enableAvailableOptionControls()
     setStatus($('#optionsStatus'), 'Saving…')
+    // Keep controls usable while serializing writes. Older results must not
+    // replace newer edits that are already visible in the form.
+    optionsSaveQueue = optionsSaveQueue.then(() => persistOptions(nextOptions, changeId))
+}
 
+async function persistOptions (nextOptions, changeId) {
+    const previousOptions = currentOptions
     try {
         const result = await storage.setOptions(nextOptions)
         currentOptions = result.options
+        if (changeId !== optionsChangeId) return
         applyOptions(currentOptions)
+        await updateStorageControl(
+            currentOptions,
+            !!result.modeError && currentOptions.hybrid,
+            changeId
+        )
+        if (changeId !== optionsChangeId) return
 
         if (result.modeError) {
-            await updateStorageControl(currentOptions, currentOptions.hybrid)
             setStatus(
                 $('#optionsStatus'),
                 'Other changes were saved, but the storage mode could not be changed.',
                 'error'
             )
         } else if (result.syncError) {
-            await updateStorageControl(currentOptions)
             setStatus(
                 $('#optionsStatus'),
                 'Saved on this computer, but Chrome could not sync these options.',
                 'warning'
             )
         } else {
-            await updateStorageControl(currentOptions)
             showTemporaryOptionsStatus('Saved', 'success')
         }
     } catch (error) {
         console.error('Read Later: unable to save options.', error)
+        if (changeId !== optionsChangeId) return
         if (previousOptions) {
             currentOptions = previousOptions
             applyOptions(previousOptions)
-            await updateStorageControl(previousOptions)
+            await updateStorageControl(previousOptions, false, changeId)
         }
+        if (changeId !== optionsChangeId) return
         setStatus($('#optionsStatus'), 'Could not save these options.', 'error')
     } finally {
-        enableAvailableOptionControls()
+        if (changeId === optionsChangeId) enableAvailableOptionControls()
     }
 }
 
 function readOptions () {
     return {
+        fontFamily:          $('#fontFamily').val(),
         itemNewTab:           $('#itemNewTab').prop('checked'),
         keepSavedTab:         $('#keepSavedTab').prop('checked'),
         itemHoverMode:        $('#itemHoverMode').val(),
@@ -131,6 +146,8 @@ function readOptions () {
 }
 
 function applyOptions (options) {
+    applyFontPreference(options)
+    $('#fontFamily').val(options?.fontFamily ?? 'system')
     $('#itemNewTab').prop('checked', options?.itemNewTab)
     $('#keepSavedTab').prop('checked', options?.keepSavedTab)
     $('#itemHoverMode').val(options?.itemHoverMode)
@@ -140,7 +157,7 @@ function applyOptions (options) {
     $('#hybrid').prop('checked', options?.hybrid)
 }
 
-async function updateStorageControl (options, syncUnavailable = false) {
+async function updateStorageControl (options, syncUnavailable = false, changeId) {
     const $hybrid = $('#hybrid')
     const $storageStatus = $('#storageStatus')
 
@@ -151,6 +168,8 @@ async function updateStorageControl (options, syncUnavailable = false) {
             console.warn('Read Later: unable to check Chrome sync storage.', error)
         }
     }
+
+    if (changeId !== undefined && changeId !== optionsChangeId) return
 
     $hybrid
         .prop('checked', options.hybrid)

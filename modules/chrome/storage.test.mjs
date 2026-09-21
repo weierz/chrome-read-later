@@ -40,6 +40,17 @@ const createStorageArea = (initialData = {}) => {
         },
         set (value, callback) {
             setCalls++
+            if (Object.entries(value).some(([key, item]) =>
+                new TextEncoder().encode(key + JSON.stringify(item)).length
+                    > (this.QUOTA_BYTES_PER_ITEM ?? Infinity)
+            )) {
+                chrome.runtime.lastError = {
+                    message: 'QUOTA_BYTES_PER_ITEM quota exceeded',
+                }
+                callback()
+                delete chrome.runtime.lastError
+                return
+            }
             if (nextError) {
                 chrome.runtime.lastError = { message: nextError }
                 nextError = undefined
@@ -109,6 +120,7 @@ beforeAll(async () => {
 beforeEach(async () => {
     syncArea.resetQuota()
     syncArea.QUOTA_BYTES = 102400
+    syncArea.QUOTA_BYTES_PER_ITEM = 8192
     syncArea.MAX_ITEMS = 512
     await storage.sync.clear()
     await storage.local.clear()
@@ -261,6 +273,67 @@ describe('hybrid reading list storage', () => {
         ).toBeUndefined()
     })
 
+    test('uses the system font by default', async () => {
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+    })
+
+    test('prefers the local font over a synced font', async () => {
+        await storage.local.set({
+            options: { fontFamily: 'monospace', isOptions: true },
+        })
+        await storage.sync.set({
+            options: { fontFamily: 'serif', isOptions: true },
+        })
+
+        expect((await storage.getOptions()).fontFamily).toBe('monospace')
+    })
+
+    test('reads a legacy synced font when no local font is saved', async () => {
+        await storage.sync.set({
+            options: { fontFamily: 'avenir', isOptions: true },
+        })
+
+        expect((await storage.getOptions()).fontFamily).toBe('avenir')
+    })
+
+    test('saves the font locally and removes legacy synced fonts', async () => {
+        await storage.sync.set({
+            options: { fontFamily: 'avenir', isOptions: true },
+        })
+
+        await storage.setOptions({ fontFamily: 'serif' })
+
+        expect((await storage.local.get('options')).options.fontFamily)
+            .toBe('serif')
+        expect((await storage.sync.get('options')).options.fontFamily)
+            .toBeUndefined()
+        expect((await storage.getOptions()).fontFamily).toBe('serif')
+    })
+
+    test('normalizes invalid saved fonts to the system font', async () => {
+        await storage.sync.set({
+            options: { fontFamily: 'unsupported', isOptions: true },
+        })
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+
+        await storage.sync.set({
+            options: { fontFamily: 'serif', isOptions: true },
+        })
+        await storage.local.set({
+            options: { fontFamily: '__proto__', isOptions: true },
+        })
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+    })
+
+    test('normalizes invalid font input before saving', async () => {
+        const result = await storage.setOptions({ fontFamily: { family: 'serif' } })
+
+        expect(result.options.fontFamily).toBe('system')
+        expect((await storage.local.get('options')).options.fontFamily)
+            .toBe('system')
+        expect((await storage.getOptions()).fontFamily).toBe('system')
+    })
+
     test('applies the time range before archiving a new item', async () => {
         const day = 24 * 60 * 60 * 1000
         await storage.setOptions({ archiveRetentionDays: 7 })
@@ -274,6 +347,50 @@ describe('hybrid reading list storage', () => {
         expect((await storage.local.sortByLatest()).map(item => item.url)).toEqual([
             'https://new-archive.example',
         ])
+    })
+
+    test('retains local options after a failed sync and resumes remote updates after saving', async () => {
+        await storage.setOptions({ hybrid: false, keepSavedTab: false })
+        syncArea.failNextSet('MAX_WRITE_OPERATIONS_PER_MINUTE exceeded')
+
+        const result = await storage.setOptions({ hybrid: false, keepSavedTab: true })
+
+        expect(result.syncError).toBeDefined()
+        expect((await storage.getOptions()).keepSavedTab).toBe(true)
+        await storage.useHybridStorage()
+        expect((await storage.getOptions()).keepSavedTab).toBe(true)
+        expect((await storage.getOptions()).syncPending).toBeUndefined()
+
+        await storage.setOptions(await storage.getOptions())
+        expect((await storage.sync.get('options')).options.keepSavedTab).toBe(true)
+        expect((await storage.sync.get('options')).options.syncPending).toBeUndefined()
+        await storage.sync.set({ options: { keepSavedTab: false, isOptions: true } })
+        expect((await storage.getOptions()).keepSavedTab).toBe(false)
+        expect((await storage.getOptions()).hybrid).toBe(true)
+    })
+
+    test('promotes smaller overflow past an item that exceeds the per-item quota', async () => {
+        await storage.setOptions({ hybrid: true })
+        const oversized = { ...page('https://large.example', 1), title: 'x'.repeat(8192) }
+        await storage.localSaved.set(oversized)
+        await storage.localSaved.set(page('https://small.example', 2))
+
+        await storage.rebalanceHybridStorage()
+
+        expect((await storage.sync.sortByLatest()).map(item => item.url))
+            .toEqual(['https://small.example'])
+        expect((await storage.localSaved.sortByLatest()).map(item => item.url))
+            .toEqual([oversized.url])
+    })
+
+    test('does not defer normal saves after a per-item quota failure', async () => {
+        await storage.setOptions({ hybrid: true })
+        await storage.setSavedPage({ ...page('https://large.example', 1), title: 'x'.repeat(8192) })
+
+        const result = await storage.setSavedPage(page('https://small.example', 2))
+
+        expect(result.syncSaved).toBe(true)
+        expect(await storage.localSaved.sortByLatest()).toHaveLength(1)
     })
 
     test('shows the union of synced and local overflow items', async () => {

@@ -38,6 +38,11 @@ Please rate it on [chrome web store](https://chrome.google.com/webstore/detail/f
 - **Sync in Cloud**: Sync across Chrome browsers with one google account.
 - **Local Archive**: Keep an archive of reading list items locally.
 
+### Hybrid Storage
+- When Chrome Sync fills up, local overflow turns on automatically so new items can still be saved on this computer.
+- Synced and local items appear together; local overflow items use a different text color and are included in exports.
+- Overflow items automatically retry syncing when space becomes available. Turn off **Store overflow items locally** in Options only when all overflow items fit in sync.
+
 ### Status Bar
 - **Row Number : Total Count**
 - **Archive Icon**: Open the full-page reading list archive.
@@ -102,7 +107,7 @@ Find **Read Later** and set the shortcuts(resolve the keyboard shortcuts conflic
 - Get/Set reading progress works on most pages, it may change based on current window size.
 - Only get/set the first HTML video's information.
 - Removing the extension will delete the reading list in the cloud, **it cannot be restored**.
-- The maximum reading list in cloud is up to 250 items, due to google's limits.
+- Chrome Sync capacity depends on item size; items that exceed its limits remain local while hybrid storage is enabled.
 - At most 10,000 reading list items are kept in the archive.
 
 ## Contribution

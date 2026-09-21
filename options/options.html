@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <meta name="color-scheme" content="light dark">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Read Later Options</title>
@@ -59,6 +60,19 @@
             </header>
 
             <div class="option-list">
+                <div class="select-row top-level">
+                    <label for="fontFamily">
+                        <strong>Interface font</strong>
+                        <small>Used in the popup, Archive, and Options on this computer.</small>
+                    </label>
+                    <select class="option-control" id="fontFamily" name="fontFamily">
+                        <option value="system">System default</option>
+                        <option value="avenir">Avenir</option>
+                        <option value="serif">Georgia</option>
+                        <option value="monospace">Monospace</option>
+                    </select>
+                </div>
+
                 <label class="option-row" for="itemNewTab">
                     <input class="option-control" id="itemNewTab" name="itemNewTab" type="checkbox">
                     <span>

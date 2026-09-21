@@ -4,12 +4,14 @@ import * as statusBar from './status-bar/statusBar.js'
 import * as runtime from '../modules/chrome/runtime.mjs'
 import * as storage from '../modules/chrome/storage.mjs'
 import { setupTooltips } from '../modules/tooltip.mjs'
+import { applyFontPreference } from '../modules/appearance.mjs'
 
 $(async () => {
     setupTooltips()
     window.isHidingLi = false
     window.lastKey = ''
     const options = await storage.getOptions()
+    applyFontPreference(options)
     let localOverflowUrls = []
 
     if (options.hybrid) {

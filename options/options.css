@@ -1,21 +1,5 @@
+@import "../modules/styles/theme.css";
 @import "../modules/styles/tooltip.css";
-
-:root {
-    color-scheme: light dark;
-    --accent: #e85d04;
-    --accent-hover: #cc4f00;
-    --accent-soft: #fff2e9;
-    --background: #f5f6f8;
-    --surface: #ffffff;
-    --surface-subtle: #f8f9fb;
-    --border: #dfe3e8;
-    --border-strong: #c8cdd3;
-    --text: #202124;
-    --muted: #67717d;
-    --success: #1e8e3e;
-    --warning: #a14200;
-    --error: #d93025;
-}
 
 * {
     box-sizing: border-box;
@@ -30,7 +14,7 @@ body {
     margin: 0;
     background: var(--background);
     color: var(--text);
-    font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 14px/1.5 var(--font-ui);
 }
 
 button,
@@ -49,7 +33,7 @@ button,
     border: 1px solid var(--accent);
     border-radius: 7px;
     background: var(--accent);
-    color: #ffffff;
+    color: var(--accent-contrast);
     cursor: pointer;
     font-weight: 650;
     text-decoration: none;
@@ -309,6 +293,12 @@ input:disabled {
     font-size: 12px;
 }
 
+#optionsStatus {
+    display: block;
+    min-height: 18px;
+    line-height: 18px;
+}
+
 .status-text.success {
     color: var(--success);
 }
@@ -486,26 +476,4 @@ input:disabled {
         width: 100%;
     }
 
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --accent: #ff8a3d;
-        --accent-hover: #ff9d5c;
-        --accent-soft: #3b2c24;
-        --background: #202124;
-        --surface: #292a2d;
-        --surface-subtle: #303134;
-        --border: #43464b;
-        --border-strong: #5f6368;
-        --text: #e8eaed;
-        --muted: #aeb4bc;
-        --success: #81c995;
-        --warning: #fdd663;
-        --error: #f28b82;
-    }
-
-    .secondary-button {
-        color: var(--text);
-    }
 }

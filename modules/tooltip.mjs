@@ -3,6 +3,7 @@ const HOVER_DELAY = 400
 const VIEWPORT_GAP = 8
 let activeTrigger
 let showTimer
+let hideTimer
 let tooltip
 let initialized = false
 
@@ -13,6 +14,7 @@ export function setupTooltips () {
     tooltip.id = TOOLTIP_ID
     tooltip.className = 'tooltip-popup'
     tooltip.setAttribute('role', 'tooltip')
+    tooltip.tabIndex = 0
     document.body.append(tooltip)
 
     document.addEventListener('mouseover', onMouseOver)
@@ -20,7 +22,15 @@ export function setupTooltips () {
     document.addEventListener('focusin', onFocusIn)
     document.addEventListener('focusout', onFocusOut)
     window.addEventListener('resize', hideTooltip)
-    window.addEventListener('scroll', hideTooltip, true)
+    window.addEventListener('scroll', event => {
+        if (!tooltip.contains(event.target)) hideTooltip()
+    }, true)
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && activeTrigger) {
+            event.preventDefault()
+            hideTooltip()
+        }
+    })
 }
 
 function getTrigger (target) {
@@ -28,29 +38,47 @@ function getTrigger (target) {
 }
 
 function onMouseOver ({ target }) {
+    if (tooltip.contains(target)) {
+        clearTimeout(hideTimer)
+        return
+    }
     const trigger = getTrigger(target)
+    if (trigger === activeTrigger) clearTimeout(hideTimer)
     if (trigger && trigger !== activeTrigger) showTooltip(trigger)
 }
 
 function onMouseOut ({ target, relatedTarget }) {
     const trigger = getTrigger(target)
-    if (trigger && !trigger.contains(relatedTarget)) hideTooltip()
+    if (trigger?.contains(relatedTarget) || tooltip.contains(relatedTarget)) return
+    if (trigger || tooltip.contains(target)) {
+        // Allow the pointer to cross the gap between the trigger and tooltip.
+        hideTimer = setTimeout(() => {
+            if (!activeTrigger?.contains(document.activeElement)
+                && !tooltip.contains(document.activeElement)) hideTooltip()
+        }, 200)
+    }
 }
 
 function onFocusIn ({ target }) {
+    if (tooltip.contains(target)) {
+        clearTimeout(hideTimer)
+        return
+    }
     const trigger = getTrigger(target)
     if (trigger) showTooltip(trigger, true)
 }
 
 function onFocusOut ({ target, relatedTarget }) {
     const trigger = getTrigger(target)
-    if (trigger && !trigger.contains(relatedTarget)) hideTooltip()
+    if (trigger?.contains(relatedTarget) || tooltip.contains(relatedTarget)) return
+    if (trigger || tooltip.contains(target)) hideTooltip()
 }
 
 function showTooltip (trigger, immediately = false) {
     hideTooltip()
     activeTrigger = trigger
     tooltip.textContent = trigger.dataset.tooltip
+    tooltip.scrollTop = 0
     trigger.setAttribute('aria-describedby', TOOLTIP_ID)
     showTimer = setTimeout(() => positionTooltip(trigger),
         immediately ? 0 : getTooltipDelay(trigger))
@@ -123,6 +151,7 @@ export function calculateTooltipPosition (
 
 export function hideTooltip () {
     clearTimeout(showTimer)
+    clearTimeout(hideTimer)
     tooltip?.classList.remove('visible')
     if (activeTrigger?.getAttribute('aria-describedby') === TOOLTIP_ID) {
         activeTrigger.removeAttribute('aria-describedby')

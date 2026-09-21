@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>Read Later product preview</title>
+    <link rel="icon" href="../icons/logo-orange32x32.png">
+    <style>
+        body { margin: 0; }
+        iframe { display: block; width: 400px; height: 600px; border: 0; }
+    </style>
+</head>
+<body>
+<main>
+    <iframe title="Read Later with example saved pages"></iframe>
+</main>
+<script type="module">
+// Render the actual extension document and scripts with isolated example data.
+// No installed extension storage is read or changed. ?view=archive or options
+// loads those same product documents for visual checks.
+function mockChrome () {
+    const examples = [
+        ['CSS grid layout · MDN', 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout', 42],
+        ['Human Interface Guidelines · Apple', 'https://developer.apple.com/design/human-interface-guidelines/', 21],
+        ['Read Later · GitHub', 'https://github.com/willbchang/chrome-read-later', 0],
+        ['Learn accessibility · web.dev', 'https://web.dev/learn/accessibility', 68],
+        ['Read Later — a quick walkthrough', 'https://www.youtube.com/watch?v=fnaFiMabPq8', 0, 35],
+        ['A Complete Guide to Flexbox', 'https://css-tricks.com/snippets/css/a-guide-to-flexbox/', 56],
+        ['Web platform documentation · MDN', 'https://developer.mozilla.org/en-US/docs/Web', 0],
+        ['Chrome for Developers', 'https://developer.chrome.com/docs/extensions', 79],
+        ['The Read Later changelog', 'https://github.com/willbchang/chrome-read-later/releases', 0],
+        ['Designing for the web · web.dev', 'https://web.dev/learn/design', 14],
+        ['JavaScript guide · MDN', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide', 0],
+        ['Read Later: documentation and shortcuts', 'https://github.com/willbchang/chrome-read-later#usages', 0],
+    ]
+    const pages = Object.fromEntries(examples.map(([title, url, read, video], index) => [url, {
+        title, url, date: Date.UTC(2026, 8, 21) - index * 60000,
+        scroll: { top: read ? 400 : 0, percent: `${read}%` },
+        video: video ? { percent: `${video}%` } : {},
+    }]))
+    const area = initial => {
+        const data = structuredClone(initial)
+        return {
+            QUOTA_BYTES: 102400, MAX_ITEMS: 512,
+            get(key, callback) {
+                callback(structuredClone(key == null ? data : (key in data ? { [key]: data[key] } : {})))
+            },
+            set(value, callback) { Object.assign(data, structuredClone(value)); callback?.() },
+            remove(keys, callback) { for (const key of [].concat(keys)) delete data[key]; callback?.() },
+            getBytesInUse(key, callback) { callback(new TextEncoder().encode(JSON.stringify(data)).length) },
+        }
+    }
+    window.previewActions = []
+    window.chrome = {
+        runtime: {
+            getURL: path => new URL('/' + path, document.baseURI).href,
+            connect: () => ({}),
+            sendMessage: message => window.previewActions.push(message),
+        },
+        storage: {
+            sync: area(pages), local: area({ ...pages, options: { selectedItemIconMode: 'mixed', archiveMode: true } }),
+            session: area({}), onChanged: { addListener() {} },
+        },
+        tabs: { create: (tab, callback) => { window.previewActions.push(tab); callback?.({ id: 1 }) } },
+    }
+}
+
+const view = new URLSearchParams(location.search).get('view')
+const name = ['archive', 'options'].includes(view) ? view : 'popup'
+const frame = document.querySelector('iframe')
+const pageUrl = new URL(`../${name}/${name}.html`, location.href)
+if (name !== 'popup') {
+    frame.style.width = '100%'
+    frame.style.height = '100vh'
+}
+const response = await fetch(pageUrl, { cache: 'no-store' })
+if (!response.ok) throw new Error(`Could not load ${name} preview`)
+// Refresh entry points when iterating locally, including srcdoc module scripts.
+const revision = Date.now()
+const html = (await response.text())
+    .replaceAll(`"${name}.js"`, `"${name}.js?preview=${revision}"`)
+    .replaceAll(`"${name}.css"`, `"${name}.css?preview=${revision}"`)
+frame.srcdoc = html.replace('<head>', `<head><base href="${new URL('.', pageUrl)}"><script>(${mockChrome})();<\/script>`)
+await new Promise(resolve => frame.onload = resolve)
+if (name === 'popup') {
+    const observer = new ResizeObserver(() => {
+        frame.style.height = `${frame.contentDocument.body.getBoundingClientRect().height}px`
+    })
+    observer.observe(frame.contentDocument.body)
+}
+</script>
+</body>
+</html>

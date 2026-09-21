@@ -1,6 +1,6 @@
 {
     "name": "chrome-read-later",
-    "version": "9.1.0",
+    "version": "9.2.0",
     "description": "A temporary bookmark focuses on reading later, rather than closing and removing, with several Vim keybindings!",
     "main": "popup.js",
     "scripts": {

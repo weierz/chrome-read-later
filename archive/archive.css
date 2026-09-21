@@ -1,18 +1,4 @@
-:root {
-    color-scheme: light dark;
-    --accent: #e85d04;
-    --accent-hover: #cc4f00;
-    --accent-soft: #fff2e9;
-    --background: #f5f6f8;
-    --surface: #ffffff;
-    --surface-subtle: #f8f9fb;
-    --border: #dfe3e8;
-    --border-strong: #c8cdd3;
-    --text: #202124;
-    --muted: #67717d;
-    --error: #d93025;
-    --video: #0969da;
-}
+@import "../modules/styles/theme.css";
 
 * {
     box-sizing: border-box;
@@ -28,7 +14,7 @@ body {
     margin: 0;
     background: var(--background);
     color: var(--text);
-    font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font: 14px/1.5 var(--font-ui);
 }
 
 button,
@@ -159,7 +145,6 @@ h1 {
     padding: 8px 12px;
     border: 1px solid var(--border-strong);
     border-radius: 7px;
-    outline: none;
     background: var(--surface);
     color: var(--text);
 }
@@ -315,7 +300,8 @@ h1 {
 .empty-state img {
     width: 32px;
     height: 32px;
-    opacity: 0.45;
+    filter: var(--icon-filter);
+    opacity: 0.75;
 }
 
 .empty-state h2 {
@@ -338,8 +324,8 @@ h1 {
     padding: 12px 12px 12px 16px;
     border: 1px solid var(--border-strong);
     border-radius: 8px;
-    background: var(--text);
-    color: var(--surface);
+    background: var(--surface);
+    color: var(--text);
     box-shadow: 0 10px 30px rgb(0 0 0 / 18%);
     opacity: 0;
     transform: translateY(10px);
@@ -356,7 +342,7 @@ h1 {
     border: 0;
     border-radius: 5px;
     background: transparent;
-    color: #ffad73;
+    color: var(--accent-hover);
     cursor: pointer;
     font-weight: 750;
 }
@@ -425,32 +411,6 @@ h1 {
         bottom: 16px;
         left: 16px;
         justify-content: space-between;
-    }
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --accent: #ff8a3d;
-        --accent-hover: #ff9d5c;
-        --accent-soft: #3b2c24;
-        --background: #202124;
-        --surface: #292a2d;
-        --surface-subtle: #303134;
-        --border: #43464b;
-        --border-strong: #5f6368;
-        --text: #e8eaed;
-        --muted: #aeb4bc;
-        --error: #f28b82;
-        --video: #76a2f0;
-    }
-
-    .undo-toast {
-        background: #e8eaed;
-        color: #202124;
-    }
-
-    .undo-toast button {
-        color: #b54700;
     }
 }
 

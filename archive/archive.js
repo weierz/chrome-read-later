@@ -1,6 +1,11 @@
 import * as runtime from '../modules/chrome/runtime.mjs'
 import * as storage from '../modules/chrome/storage.mjs'
-import { getSiteFaviconUrl } from '../modules/favicon.mjs'
+import { applyFontPreference } from '../modules/appearance.mjs'
+import {
+    applyFaviconFallback,
+    getSiteFaviconFallbackUrl,
+    getSiteFaviconUrl,
+} from '../modules/favicon.mjs'
 import {
     filterArchivePages,
     getArchiveProgress,
@@ -25,8 +30,12 @@ async function init () {
     bindEvents()
 
     try {
-        archivePages = (await storage.local.sortByLatest())
-            .filter(page => page.url)
+        const [pages, options] = await Promise.all([
+            storage.local.sortByLatest(),
+            storage.getOptions(),
+        ])
+        applyFontPreference(options)
+        archivePages = pages.filter(page => page.url)
         applyFilter()
     } catch (error) {
         console.error('Read Later: unable to load the archive.', error)
@@ -98,6 +107,8 @@ function createArchiveItem (page) {
     const favicon = document.createElement('img')
     favicon.className = 'item-favicon'
     favicon.src = getSiteFaviconUrl(page.url) || page.favIconUrl
+    favicon.dataset.faviconFallback = getSiteFaviconFallbackUrl(page.url)
+    favicon.addEventListener('error', () => applyFaviconFallback(favicon))
     favicon.alt = ''
     favicon.loading = 'lazy'
 
