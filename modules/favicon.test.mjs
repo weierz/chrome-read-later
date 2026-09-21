@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 import {
     applySiteFavicon,
+    applyFaviconFallback,
+    getSiteFaviconFallbackUrl,
     getChromeFaviconUrl,
     getSiteFaviconUrl,
 } from './favicon.mjs'
@@ -69,5 +71,30 @@ describe('site favicon URL', () => {
         expect(image.src).toContain('delete.svg')
         expect(image.dataset.faviconSrc)
             .toBe('https://t0.gstatic.com/faviconV2')
+    })
+    test('creates a sharp local letter fallback', () => {
+        const fallbackUrl = getSiteFaviconFallbackUrl(
+            'https://www.local.example/article'
+        )
+        const svg = decodeURIComponent(fallbackUrl.split(',')[1])
+
+        expect(fallbackUrl).toStartWith('data:image/svg+xml,')
+        expect(svg).toContain('width="32" height="32"')
+        expect(svg).toContain('>L</text>')
+    })
+
+    test('applies the fallback once and preserves selection restoration', () => {
+        const image = {
+            src:     'https://t0.gstatic.com/faviconV2',
+            dataset: {
+                faviconFallback: 'data:image/svg+xml,fallback',
+                faviconSrc:      'https://t0.gstatic.com/faviconV2',
+            },
+        }
+
+        expect(applyFaviconFallback(image)).toBe(true)
+        expect(image.src).toBe('data:image/svg+xml,fallback')
+        expect(image.dataset.faviconSrc).toBe('data:image/svg+xml,fallback')
+        expect(applyFaviconFallback(image)).toBe(false)
     })
 })
