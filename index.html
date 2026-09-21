@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Save the good stuff for later. Read Later is a free, open-source Chrome extension that saves pages, remembers your place, and keeps your reading list close.">
+  <meta name="theme-color" content="#faf9f6">
+  <meta property="og:title" content="Read Later — Good reads. On your time.">
+  <meta property="og:description" content="A little space for everything you want to come back to. Save pages and pick up where you left off with Read Later for Chrome.">
+  <meta property="og:type" content="website">
+  <title>Read Later — Good reads. On your time.</title>
+  <link rel="icon" href="icons/logo-orange32x32.png" type="image/png">
+  <link rel="stylesheet" href="landing/landing.css">
+  <script src="landing/landing.js" defer></script>
+</head>
+<body>
+  <svg class="svg-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="icon-bookmark" viewBox="0 0 24 24"><path d="M6 20V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v15l-6-4z"/></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="icon-sync" viewBox="0 0 24 24"><path d="M20 7a9 9 0 0 0-15-2L3 8m0-5v5h5M4 17a9 9 0 0 0 15 2l2-3m0 5v-5h-5"/></symbol>
+    <symbol id="icon-position" viewBox="0 0 24 24"><path d="M5 4h14M5 9h10M5 14h6M5 19h6m4-4 3 3 3-3m-3-4v7"/></symbol>
+    <symbol id="icon-code" viewBox="0 0 24 24"><path d="m8 7-5 5 5 5m8-10 5 5-5 5m-3-13-2 20"/></symbol>
+    <symbol id="icon-chrome" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="4"/><path d="M12 8h8.6M8.5 14 4.2 6.5M14 15.5l-4.3 6"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="icon-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="icon-github" viewBox="0 0 24 24"><path d="M9 19c-4 1-4-2-6-2m12 5v-4a3.5 3.5 0 0 0-1-2.7c3.3-.4 6.7-1.6 6.7-7.3A5.7 5.7 0 0 0 19.2 4a5.3 5.3 0 0 0-.1-4S17.9-.4 15 1.5a14 14 0 0 0-6 0C6.1-.4 4.9 0 4.9 0a5.3 5.3 0 0 0-.1 4 5.7 5.7 0 0 0-1.5 4c0 5.7 3.4 6.9 6.7 7.3A3.5 3.5 0 0 0 9 18v4" transform="translate(1 1) scale(.9)"/></symbol>
+  </svg>
+
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="wordmark" href="#" aria-label="Read Later home">
+      <img src="icons/logo-orange128x128.png" alt="" width="30" height="30">
+      <span>read later<span class="brand-period">.</span></span>
+    </a>
+    <nav class="main-nav" aria-label="Main">
+      <a href="#features">Why Read Later</a>
+      <a href="#how-it-works">How it works</a>
+      <a class="nav-github" href="https://github.com/willbchang/chrome-read-later">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+    <a class="button button-small button-dark" href="https://chromewebstore.google.com/detail/fbmfcfkokefgbmfcjahdmomlifclekib">Add to Chrome <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="hero wrap">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="little-star" aria-hidden="true">✳</span> LESS TAB CLUTTER. MORE CURIOSITY.</p>
+        <h1>Good reads.<br><span>On your time.</span></h1>
+        <p class="hero-description">An interesting article. A video worth finishing.<br class="desktop-break"> Keep the good stuff, close the tabs, and come back<br class="desktop-break"> when you have a moment.</p>
+        <div class="hero-actions">
+          <a class="button button-orange" href="https://chromewebstore.google.com/detail/fbmfcfkokefgbmfcjahdmomlifclekib"><svg class="icon" aria-hidden="true"><use href="#icon-chrome"/></svg> Add to Chrome <svg class="icon arrow" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+          <a class="text-link" href="#how-it-works">See how it works <span aria-hidden="true">↘</span></a>
+        </div>
+        <p class="hero-note"><svg class="icon" aria-hidden="true"><use href="#icon-check"/></svg> Free to use <span aria-hidden="true">·</span> Open source <span aria-hidden="true">·</span> No extra account</p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="sun-disc" aria-hidden="true"></div>
+        <div class="orbit-star" aria-hidden="true">✳</div>
+        <div class="paper-back" aria-hidden="true"></div>
+        <section class="reading-preview" aria-labelledby="preview-title">
+          <div class="browser-bar" aria-hidden="true"><span class="browser-dots"><i></i><i></i><i></i></span><span>A little room for later</span><svg class="icon"><use href="#icon-plus"/></svg></div>
+          <div class="preview-heading">
+            <div><img src="icons/logo-orange128x128.png" width="23" height="23" alt=""><h2 id="preview-title">Your reading list</h2></div>
+            <span class="item-count" id="item-count">4 items</span>
+          </div>
+          <ul class="reading-items" role="list">
+            <li class="reading-item highlighted">
+              <span class="article-mark mark-sun" aria-hidden="true">✳</span>
+              <div class="article-info"><span class="article-title">The art of paying attention</span><span class="article-source">A little everyday inspiration</span><span class="progress-track" aria-hidden="true"><span></span></span></div>
+              <span class="reading-progress">42%<span class="sr-only"> read</span></span>
+            </li>
+            <li class="reading-item">
+              <span class="article-mark mark-letter" aria-hidden="true">a.</span>
+              <div class="article-info"><span class="article-title">A small guide to big ideas</span><span class="article-source">Something to think about</span></div>
+              <svg class="icon item-bookmark" aria-hidden="true"><use href="#icon-bookmark"/></svg>
+            </li>
+            <li class="reading-item">
+              <span class="article-mark mark-video" aria-hidden="true">▶</span>
+              <div class="article-info"><span class="article-title">Making space for creative work</span><span class="article-source">A video worth coming back to</span></div>
+              <span class="reading-progress video-progress">18%<span class="sr-only"> watched</span></span>
+            </li>
+            <li class="reading-item">
+              <span class="article-mark mark-leaf" aria-hidden="true">↗</span>
+              <div class="article-info"><span class="article-title">Take the scenic route</span><span class="article-source">For your next slow Sunday</span></div>
+              <svg class="icon item-bookmark" aria-hidden="true"><use href="#icon-bookmark"/></svg>
+            </li>
+            <li class="reading-item saved-sample" id="saved-sample" hidden>
+              <span class="article-mark mark-new" aria-hidden="true"><svg class="icon"><use href="#icon-bookmark"/></svg></span>
+              <div class="article-info"><span class="article-title">Your next good read</span><span class="article-source">Saved for whenever you're ready</span></div>
+              <svg class="icon saved-check" aria-hidden="true"><use href="#icon-check"/></svg>
+            </li>
+          </ul>
+          <div class="preview-footer"><span><span class="sync-dot" aria-hidden="true"></span>A little less on your mind</span><svg class="icon" aria-hidden="true"><use href="#icon-sync"/></svg></div>
+          <button class="preview-save" id="preview-save" type="button" hidden><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg><span>Try saving a page</span></button>
+        </section>
+        <div class="place-note" aria-hidden="true"><span><svg class="icon"><use href="#icon-position"/></svg></span><div>Your place, remembered.<small>Pick up right where you left off.</small></div></div>
+        <p class="preview-caption">A simplified preview with sample reads. <span id="try-hint" hidden>Give it a try ↑</span></p>
+        <p class="sr-only" id="preview-status" role="status"></p>
+      </div>
+    </section>
+
+    <div class="principles wrap" aria-label="Made for your everyday browsing">
+      <p>A small extension.<br><strong>A little more headspace.</strong></p>
+      <span><svg class="icon" aria-hidden="true"><use href="#icon-bookmark"/></svg> Save in a moment</span>
+      <span><svg class="icon" aria-hidden="true"><use href="#icon-position"/></svg> Remember your place</span>
+      <span><svg class="icon" aria-hidden="true"><use href="#icon-sync"/></svg> Take your list with you</span>
+    </div>
+
+    <section class="features wrap section-space" id="features">
+      <div class="section-intro"><p class="eyebrow">A BOOKMARK, WITH A LITTLE MORE THOUGHT.</p><h2>The internet can wait.<br>Your curiosity doesn’t have to.</h2><p>Everything you need to come back to something good.<br>Nothing to get in the way.</p></div>
+      <div class="feature-grid">
+        <article class="feature">
+          <div class="feature-art art-save" aria-hidden="true"><div class="mini-page"><span class="mini-page-label">Something good.</span><span class="mini-line"></span><span class="mini-line short"></span><span class="mini-line"></span><span class="mini-page-bookmark"><svg class="icon"><use href="#icon-bookmark"/></svg></span></div><span class="mini-saved"><svg class="icon"><use href="#icon-check"/></svg> Saved for later</span></div>
+          <h3>Keep the find. Lose the tab.</h3><p>Save a page or link with a right-click or shortcut. Your next great read has a home, so it doesn’t need an open tab.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-art art-resume" aria-hidden="true"><div class="resume-lines"><i></i><i></i><span class="resume-marker">You were right here <svg class="icon"><use href="#icon-arrow"/></svg></span><i></i><i></i></div><span class="resume-percent">42<span>%</span></span></div>
+          <h3>Right where you left off.</h3><p>Come back to your saved scroll position or video playback. Less finding your place. More getting into it.</p>
+        </article>
+        <article class="feature">
+          <div class="feature-art art-sync" aria-hidden="true"><div class="mini-device laptop"><span></span><i></i><i></i></div><svg class="icon sync-between"><use href="#icon-sync"/></svg><div class="mini-device desktop"><span></span><i></i><i></i></div></div>
+          <h3>Your list, along for the ride.</h3><p>Use Chrome Sync to bring saved reads between computers. When sync fills up, new saves stay safely on this computer.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="how-section" id="how-it-works">
+      <div class="wrap how-layout">
+        <div class="how-intro"><p class="eyebrow">FROM “SOMEDAY” TO A GOOD READ.</p><h2>Find it.<br>Save it.<br><span>Enjoy it later.</span></h2><p>No folders to organize.<br>No new routine to learn.</p><a class="text-link" href="https://github.com/willbchang/chrome-read-later#usages">Explore all the shortcuts <svg class="icon" aria-hidden="true"><use href="#icon-arrow"/></svg></a></div>
+        <ol class="steps" role="list">
+          <li><span class="step-number">01</span><div><h3>Make yourself at home.</h3><p>Add Read Later to Chrome and pin it to your toolbar. Your reading list is always one click away.</p></div></li>
+          <li><span class="step-number">02</span><div><h3>Follow your curiosity.</h3><p>Found something good? Right-click and choose “Save to Read Later,” or use the default keyboard shortcut.</p><div class="shortcut" aria-label="Alt or Option plus Shift plus S"><kbd>Alt / ⌥</kbd><span>+</span><kbd>Shift</kbd><span>+</span><kbd>S</kbd><span class="shortcut-label">and it’s saved.</span></div></div></li>
+          <li><span class="step-number">03</span><div><h3>Come back when you’re ready.</h3><p>Open your list, choose a read, and settle in. Read Later brings you back to your saved place on supported pages.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="faq wrap section-space" id="questions">
+      <div class="faq-intro"><p class="eyebrow">GOOD TO KNOW</p><h2>Small extension.<br>Open book.</h2><p>Built for reading, with nothing to hide.</p><a class="text-link" href="https://github.com/willbchang/chrome-read-later"><svg class="icon" aria-hidden="true"><use href="#icon-github"/></svg> Take a look at the code <span aria-hidden="true">↗</span></a></div>
+      <div class="faq-list">
+        <details><summary>Is Read Later really free?<svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg></summary><p>Yes. Read Later is free and open source, licensed under AGPL-3.0. You can explore the code, report an issue, or contribute on GitHub.</p></details>
+        <details><summary>Do I need to create an account?<svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg></summary><p>No separate Read Later account is needed. To sync your reading list between computers, use the same Google account with Chrome Sync enabled.</p></details>
+        <details><summary>What happens to my reading data?<svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg></summary><p>Saved links, titles, and reading positions use Chrome storage. Synced entries use Chrome Sync; your archive and overflow items stay on this computer. Read Later may fetch a saved page to get its title and request site icons from Google, sharing the website’s domain. <a href="https://github.com/willbchang/chrome-read-later/blob/master/.github/policy-privacy.md">Read the privacy policy</a>.</p></details>
+        <details><summary>Does it remember every page and video?<svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg></summary><p>Reading progress works on most web pages and can vary with the window size and page layout. Video progress supports the first HTML video on a page. PDFs and some sites are not supported.</p></details>
+        <details><summary>What if my Chrome Sync storage is full?<svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg></summary><p>With local overflow enabled, new items stay on this computer and appear in your reading list. They retry syncing when space becomes available. Local overflow items won’t appear on your other computers until they sync.</p></details>
+      </div>
+    </section>
+
+    <section class="closing wrap">
+      <span class="closing-spark" aria-hidden="true">✳</span><p class="eyebrow">FOR YOUR NEXT “I’LL READ THIS LATER.”</p><h2>Leave a little room<br>for a good read.</h2><a class="button button-orange" href="https://chromewebstore.google.com/detail/fbmfcfkokefgbmfcjahdmomlifclekib"><svg class="icon" aria-hidden="true"><use href="#icon-chrome"/></svg> Add to Chrome <svg class="icon arrow" aria-hidden="true"><use href="#icon-arrow"/></svg></a><p class="closing-note">Free. Open source. Ready when you are.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer wrap">
+    <a class="wordmark" href="#" aria-label="Read Later home"><img src="icons/logo-orange128x128.png" alt="" width="26" height="26"><span>read later<span class="brand-period">.</span></span></a>
+    <p>Made with care by <a href="https://github.com/willbchang">Will B Chang</a>.</p>
+    <nav aria-label="Footer"><a href="https://github.com/willbchang/chrome-read-later/blob/master/.github/policy-privacy.md">Privacy</a><a href="https://github.com/willbchang/chrome-read-later/issues">Feedback</a><a href="https://github.com/willbchang/chrome-read-later">GitHub <span aria-hidden="true">↗</span></a></nav>
+  </footer>
+</body>
+</html>
