@@ -14,7 +14,7 @@ for (const button of themeButtons) {
   button.addEventListener('click', () => {
     const theme = button.dataset.screenshotTheme;
     screenshot.src = screenshots[theme];
-    screenshot.alt = `Read Later in ${theme} appearance, showing the compact saved-page list, site icons, orange reading percentages, and the count and controls along the bottom.`;
+    screenshot.alt = `Read Later in ${theme} appearance, showing saved pages, orange reading progress, blue video progress, and Archive, Options, and Help controls.`;
     fullScreenshot.href = screenshots[theme];
 
     for (const themeButton of themeButtons) {

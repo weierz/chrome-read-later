@@ -82,10 +82,8 @@
   .screenshot-themes button { min-inline-size: 49px; min-block-size: 38px; padding: 6px 10px; border: 0; border-radius: 4px; background: transparent; color: #62675c; font-size: .7rem; }
   .screenshot-themes button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 4px #343b231a; font-weight: 600; }
   .screenshot-themes button:hover { color: var(--orange); }
-  .product-crop { position: relative; aspect-ratio: 806 / 1036; overflow: clip; border: 1px solid #d9dad2; border-radius: 3px; background: #fff; box-shadow: 0 20px 45px -25px #48402d55, 0 3px 7px #48402d10; }
-  /* Focus the original 2560 × 1600 documentation capture on the real popup.
-     The source image is unchanged; both appearance captures use this rectangle. */
-  .product-crop img { position: absolute; inline-size: calc(100% * 2560 / 806); max-inline-size: none; block-size: auto; inset-inline-start: calc(-100% * 1435 / 806); inset-block-start: calc(-100% * 224 / 1036); }
+  .product-crop { border: 1px solid #d9dad2; border-radius: 3px; overflow: clip; background: var(--paper); box-shadow: 0 20px 45px -25px #48402d55, 0 3px 7px #48402d10; }
+  .product-crop img { inline-size: 100%; block-size: auto; }
   .product-caption { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; margin-block-start: 12px; color: var(--muted); font-size: .64rem; }
   .product-caption a { display: inline-flex; align-items: center; gap: 4px; min-block-size: 36px; text-decoration: underline; text-decoration-color: #c3c4bb; text-underline-offset: 3px; }
   .product-caption a:hover { color: var(--orange); text-decoration-color: currentColor; }
