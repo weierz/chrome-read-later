@@ -13,6 +13,25 @@ export function getSiteFaviconUrl (pageUrl) {
     }
 }
 
+export function getChromeFaviconUrl (pageUrl, extensionId) {
+    if (!pageUrl || !extensionId) return ''
+    return `chrome-extension://${extensionId}/_favicon/` +
+        `?pageUrl=${encodeURIComponent(pageUrl)}&size=32`
+}
+
+export function applySiteFavicon (image, siteFaviconUrl) {
+    if (!siteFaviconUrl) return false
+
+    if (image.dataset.deleteAction) {
+        image.dataset.faviconSrc = siteFaviconUrl
+    } else {
+        image.src = siteFaviconUrl
+        if (image.dataset.faviconSrc)
+            image.dataset.faviconSrc = siteFaviconUrl
+    }
+    return true
+}
+
 export function getSiteFaviconFallbackUrl (pageUrl) {
     try {
         const url = new URL(pageUrl)

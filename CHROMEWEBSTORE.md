@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — Read Later
 
-Last updated: 2026-09-11
+Last updated: 2026-09-21
 
 ## Store listing
 
@@ -18,6 +18,18 @@ Last updated: 2026-09-11
 The existing detailed description is retained with this introduction:
 
 > New in 9.2.0: Keep saving when Chrome Sync is full. Extra items stay on this computer, appear alongside synced items, and retry syncing when space is available. Local overflow items are highlighted and included in exports.
+
+
+
+
+## Current local release candidate
+
+- Version: `9.3.0`
+- Branch: `codex/05-reading-list-ui`
+- Latest capability: Reading list presentation and favicon handling. Includes preceding branch capabilities and committed master baseline `8e6cc7f`.
+- State: packaged and locally tested; not uploaded or published.
+- Before store submission, use this candidate description and the additional disclosures below to update the listing. Existing dashboard statements elsewhere in this file describe the earlier 9.2.0 submission.
+
 
 ## Graphics
 
@@ -42,6 +54,11 @@ Saved URLs, page titles, scroll positions, and video playback positions are stor
 The dashboard discloses Web history, User activity, and Website content; remote code is marked No. Those disclosures and the existing certifications were retained. The policy URL was verified accessible: https://github.com/willbchang/chrome-read-later/blob/master/.github/policy-privacy.md. It describes local storage and Chrome Sync. Publisher contact details and regional distribution remain as configured in the dashboard.
 
 ## Version history
+
+- 9.3.0: Unpublished local candidate — Reading list presentation and favicon handling. Review fixes and current master baseline included.
+
+
+
 
 | Version | Date | Changes | Status |
 | --- | --- | --- | --- |

@@ -40,3 +40,18 @@ export function serializeReadingList (items, format = 'json') {
     }
     return JSON.stringify(items, null, 2)
 }
+
+export function parseReadingListUrl (value) {
+    if (typeof value !== 'string' || !value.trim()) {
+        throw new Error('Invalid URL: expected an absolute page URL')
+    }
+
+    const url = new URL(value)
+    const supportedProtocols = [
+        'http:', 'https:', 'file:', 'chrome:', 'chrome-extension:', 'about:',
+    ]
+    if (!supportedProtocols.includes(url.protocol)) {
+        throw new Error('Unsupported URL scheme')
+    }
+    return value.trim()
+}

@@ -2,6 +2,7 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 
 /* global globalThis */
 
+globalThis.chrome = { runtime: { id: 'extension-id' } }
 globalThis.he = { encode: value => value }
 
 let getTitleScrollMetrics
@@ -92,15 +93,19 @@ describe('reading item storage styling', () => {
         expect(html).not.toContain('scroll-title')
     })
 
-    test('uses the site favicon service for existing saved items', () => {
+    test('renders Chrome fallback while the site favicon loads', () => {
         const html = renderLiFrom({
             ...page,
-            favIconUrl: 'chrome-extension://extension-id/_favicon/',
+            favIconUrl: 'https://stored.example/favicon.png',
         })
 
-        expect(html).toContain('https://t0.gstatic.com/faviconV2?')
+        expect(html).toContain(
+            'src="chrome-extension://extension-id/_favicon/'
+        )
+        expect(html).toContain(
+            'data-site-favicon-src="https://t0.gstatic.com/faviconV2?'
+        )
         expect(html).toContain('url=https%3A%2F%2Flocal.example')
-        expect(html).toContain('data-favicon-fallback="data:image/svg+xml,')
-        expect(html).not.toContain('chrome-extension://extension-id')
+        expect(html).not.toContain('https://stored.example/favicon.png')
     })
 })

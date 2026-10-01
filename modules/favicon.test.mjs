@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 import {
+    applySiteFavicon,
     applyFaviconFallback,
     getSiteFaviconFallbackUrl,
+    getChromeFaviconUrl,
     getSiteFaviconUrl,
 } from './favicon.mjs'
 
@@ -34,6 +36,42 @@ describe('site favicon URL', () => {
         expect(getSiteFaviconUrl('chrome://settings')).toBe('')
     })
 
+    test('creates an immediate Chrome favicon URL', () => {
+        expect(getChromeFaviconUrl(
+            'https://local.example/article',
+            'extension-id'
+        )).toBe(
+            'chrome-extension://extension-id/_favicon/' +
+            '?pageUrl=https%3A%2F%2Flocal.example%2Farticle&size=32'
+        )
+    })
+
+    test('applies a loaded site favicon', () => {
+        const image = {
+            src:     'chrome-extension://extension-id/_favicon/',
+            dataset: {},
+        }
+
+        expect(applySiteFavicon(image, 'https://t0.gstatic.com/faviconV2'))
+            .toBe(true)
+        expect(image.src).toBe('https://t0.gstatic.com/faviconV2')
+    })
+
+    test('keeps the delete icon visible while updating its restoration URL', () => {
+        const image = {
+            src:     'chrome-extension://extension-id/icons/delete.svg',
+            dataset: {
+                deleteAction: 'true',
+                faviconSrc:   'chrome-extension://extension-id/_favicon/',
+            },
+        }
+
+        applySiteFavicon(image, 'https://t0.gstatic.com/faviconV2')
+
+        expect(image.src).toContain('delete.svg')
+        expect(image.dataset.faviconSrc)
+            .toBe('https://t0.gstatic.com/faviconV2')
+    })
     test('creates a sharp local letter fallback', () => {
         const fallbackUrl = getSiteFaviconFallbackUrl(
             'https://www.local.example/article'
