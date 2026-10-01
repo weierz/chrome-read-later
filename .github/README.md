@@ -20,7 +20,7 @@ Please rate it on [chrome web store](https://chrome.google.com/webstore/detail/f
 <summary>Manual Installation</summary>
 
 1. Download [chrome-read-later.zip](https://github.com/willbchang/chrome-read-later/releases/latest).
-2. Unzip it and move it to the safe path(you won't delete it accidentally).
+2. Unzip it into a folder and move that folder to a safe path (you won't delete it accidentally). `manifest.json` is at the top of the folder.
 3. Go to `chrome://extensions/`
 4. Open `Developer mode`.
 5. Drag the folder to chrome or Click `Load unpacked` and select the folder.
@@ -43,11 +43,21 @@ Please rate it on [chrome web store](https://chrome.google.com/webstore/detail/f
 - Synced and local items appear together; local overflow items use a different text color and are included in exports.
 - Overflow items automatically retry syncing when space becomes available. Turn off **Store overflow items locally** in Options only when all overflow items fit in sync.
 
+### Appearance
+- **Light and Dark Themes**: The popup, Archive, and Options follow your system appearance with one shared palette.
+- **Interface Font**: Choose System default, Avenir, Georgia, or Monospace in Options. The choice applies on this computer only.
+- **Site Icons**: The popup shows Chrome's cached icon instantly, then the site's own icon once it loads.
+
 ### Status Bar
 - **Row Number : Total Count**
 - **Archive Icon**: Open the full-page reading list archive.
 - **Options Icon**: Open the unified options page.
 - **Question Icon**: Click to open the documentation & feedback page.
+- Status bar icons are buttons: press <kbd>Tab</kbd> to reach them and <kbd>Enter</kbd> or <kbd>Space</kbd> to activate. Tooltips can be scrolled and dismissed with <kbd>Esc</kbd>.
+
+### Import and Export
+- Export the reading list as JSON or JSONL from Options, and import either format.
+- Imported items must have an absolute `http`, `https`, `file`, `chrome`, `chrome-extension`, or `about` URL. Invalid entries are skipped and counted as failed; valid entries are still imported.
 
 ## Usages
 
@@ -97,9 +107,9 @@ Find **Read Later** and set the shortcuts(resolve the keyboard shortcuts conflic
 | Move to Bottom                            | Scroll to End                              | <kbd>Command</kbd> + <kbd>↓</kbd>                | <kbd>G</kbd>                  |
 | Restore a deletion                        | \                                          | <kbd>Command</kbd> + <kbd>z</kbd>                | <kbd>u</kbd>                  |
 | Copy link address                         | `Right Click` and select copy link address | \                                                | <kbd>yy</kbd>                 |
-| Open archive                              | Click Archive icon                         | \                                                | <kbd>A</kbd>                  |
-| Open settings page        | Click Settings icon                        | \                                                | <kbd>,</kbd>                  |
-| Open documentation & feedback site        | Click Question icon                        | \                                                | <kbd>?</kbd>                  |
+| Open archive                              | Click Archive icon                         | <kbd>Tab</kbd> to Archive, <kbd>Enter</kbd>      | <kbd>A</kbd>                  |
+| Open settings page                        | Click Options icon                         | <kbd>Tab</kbd> to Options, <kbd>Enter</kbd>      | <kbd>,</kbd>                  |
+| Open documentation & feedback site        | Click Question icon                        | <kbd>Tab</kbd> to Help, <kbd>Enter</kbd>         | <kbd>?</kbd>                  |
 | Run the configured item hover behavior   | `Hover` text                               | \                                                | \                             |
 
 
@@ -109,6 +119,7 @@ Find **Read Later** and set the shortcuts(resolve the keyboard shortcuts conflic
 - Removing the extension will delete the reading list in the cloud, **it cannot be restored**.
 - Chrome Sync capacity depends on item size; items that exceed its limits remain local while hybrid storage is enabled.
 - At most 10,000 reading list items are kept in the archive.
+- Site icons are requested from Google's favicon service using only the site's origin (for example `https://example.com`).
 
 ## Contribution
 Suggestion & PR are welcome. Please open an issue to discussion first.
