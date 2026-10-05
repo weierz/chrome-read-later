@@ -12,6 +12,8 @@
     padding: 0 10px;
     line-height: 32px;
     border-radius: 5px;
+    /* Keep the list padding visible when keyboard moves scroll an item in. */
+    scroll-margin-block: 6px;
 }
 
 #reading-list li.active {
