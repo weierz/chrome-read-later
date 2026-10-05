@@ -44,6 +44,19 @@
     opacity: 0.6;
 }
 
+/* Marks local-only items; the count tooltip has the breakdown. */
+#status-bar .local-dot {
+    width: 6px;
+    height: 6px;
+    margin-left: 5px;
+    border-radius: 50%;
+    background: var(--warning);
+}
+
+#status-bar .local-dot[hidden] {
+    display: none;
+}
+
 #status-bar #count[data-format="total"] :is(#row, .count-separator) {
     display: none;
 }

@@ -146,6 +146,7 @@ const updateCount = () => {
     const current = separator ? `${row}${separator}${total}` : `${total}`
     const local = items.filter('.local-overflow').length
     const synced = total - local
+    count.find('.local-dot').prop('hidden', !local)
     const text = `${current} (${synced} synced + ${local} local)`
     count.attr({ 'aria-label': text, 'data-tooltip': text })
 }
