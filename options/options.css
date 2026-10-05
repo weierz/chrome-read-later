@@ -140,7 +140,7 @@ button:disabled {
 .content {
     width: min(720px, calc(100% - 64px));
     margin: 0 auto;
-    padding: 0 0 80px;
+    padding: 40px 0 80px;
 }
 
 .visually-hidden {
@@ -153,16 +153,6 @@ button:disabled {
     white-space: nowrap;
 }
 
-/* Keeps save status in view while scrolling. */
-.content-header {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    display: flex;
-    justify-content: flex-end;
-    padding: 14px 0;
-    background: var(--background);
-}
 
 h1,
 h2,
@@ -313,10 +303,23 @@ input:disabled {
     font-size: 12px;
 }
 
+/* Save errors and warnings float in view, like the Archive undo toast. */
 #optionsStatus {
-    display: block;
-    min-height: 18px;
-    line-height: 18px;
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    z-index: 20;
+    max-width: min(420px, calc(100vw - 48px));
+    padding: 10px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    font-size: 13px;
+}
+
+#optionsStatus:empty {
+    display: none;
 }
 
 .status-text.success {
@@ -467,18 +470,13 @@ input:disabled {
         border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
     }
 
-    .content-header {
-        position: static;
-    }
-
     .content {
         width: min(100% - 32px, 720px);
-        padding: 0 0 64px;
+        padding: 28px 0 64px;
     }
 }
 
 @media (max-width: 680px) {
-    .content-header,
     .export-heading {
         display: block;
     }
