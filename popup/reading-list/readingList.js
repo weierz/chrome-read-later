@@ -73,7 +73,13 @@ function activeFirstLi () {
 }
 
 function updateStateOnMouseMove () {
-    readingList.on('mousemove', 'li', ({ currentTarget }) => {
+    // Chrome fires mousemove when the list scrolls under a still pointer,
+    // which would steal the selection from gg, G, j, and k.
+    let lastPointer
+    readingList.on('mousemove', 'li', ({ currentTarget, screenX, screenY }) => {
+        const pointer = `${screenX},${screenY}`
+        if (pointer === lastPointer) return
+        lastPointer = pointer
         const li = $(currentTarget)
         action.reactive(li, 'mouse')
         action.updateRowNumber()
