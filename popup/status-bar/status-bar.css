@@ -46,11 +46,12 @@
 
 /* Marks local-only items; the count tooltip has the breakdown. */
 #status-bar .local-dot {
-    width: 6px;
-    height: 6px;
-    margin-left: 5px;
+    width: 4px;
+    height: 4px;
+    margin-left: 4px;
     border-radius: 50%;
-    background: var(--warning);
+    background: var(--local);
+    opacity: 0.7;
 }
 
 #status-bar .local-dot[hidden] {
