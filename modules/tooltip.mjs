@@ -78,6 +78,12 @@ function showTooltip (trigger, immediately = false) {
     hideTooltip()
     activeTrigger = trigger
     tooltip.textContent = trigger.dataset.tooltip
+    if (trigger.dataset.tooltipDetail) {
+        const detail = document.createElement('span')
+        detail.className = 'tooltip-detail'
+        detail.textContent = trigger.dataset.tooltipDetail
+        tooltip.append(detail)
+    }
     tooltip.scrollTop = 0
     trigger.setAttribute('aria-describedby', TOOLTIP_ID)
     showTimer = setTimeout(() => positionTooltip(trigger),

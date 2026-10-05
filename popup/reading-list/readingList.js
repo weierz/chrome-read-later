@@ -57,6 +57,9 @@ function setupItemHoverBehavior () {
     readingList.find('a.mixed-hover').each((_, anchor) => {
         generator.setupMixedHover(anchor)
     })
+    readingList.find('a[data-tooltip][data-tooltip-detail]').each((_, anchor) => {
+        generator.setupDetailsTooltip(anchor)
+    })
 }
 
 function activeFirstLi () {

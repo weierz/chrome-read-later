@@ -11,7 +11,7 @@
 
 body {
     width: 400px;
-    background: var(--background);
+    background: var(--surface);
     color: var(--text);
     font: 14px/1.5 var(--font-ui);
 }
@@ -21,5 +21,5 @@ body {
 }
 
 html {
-    background: var(--background);
+    background: var(--surface);
 }

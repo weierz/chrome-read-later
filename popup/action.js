@@ -118,13 +118,8 @@ const showDeleteIcon = li => {
 
     if (!image.dataset.faviconSrc) image.dataset.faviconSrc = image.src
     image.dataset.deleteAction = 'true'
-    image.src = isDarkMode()
-        ? '../icons/delete-white.svg'
-        : '../icons/delete-black.svg'
+    image.src = '../icons/delete-black.svg'
 }
-
-const isDarkMode = () => window.matchMedia &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches
 
 export const scrollTo = (li) => {
     li[0].scrollIntoView({ block: 'nearest' })

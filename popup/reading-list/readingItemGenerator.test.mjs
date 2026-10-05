@@ -8,12 +8,14 @@ globalThis.he = { encode: value => value }
 let getTitleScrollMetrics
 let getMixedHoverMode
 let renderLiFrom
+let setupDetailsTooltip
 
 beforeAll(async () => {
     ({
         getMixedHoverMode,
         getTitleScrollMetrics,
         renderLiFrom,
+        setupDetailsTooltip,
     } = await import('./readingItemGenerator.js'))
 })
 
@@ -43,6 +45,45 @@ describe('reading item storage styling', () => {
         expect(html).toContain('data-tooltip=')
         expect(html).toContain('data-tooltip-delay="800"')
         expect(html).not.toContain(' title=')
+    })
+
+    test('puts the URL on its own tooltip line', () => {
+        const html = renderLiFrom(page)
+
+        expect(html).toContain('data-tooltip="Local overflow item"')
+        expect(html).toContain('data-tooltip-detail="https://local.example"')
+    })
+
+    test('shows only the URL when the title is the URL', () => {
+        const html = renderLiFrom({ ...page, title: page.url })
+
+        expect(html).toContain('data-tooltip="https://local.example"')
+        expect(html).not.toContain('data-tooltip-detail')
+    })
+
+    test('drops the repeated title when it fits', () => {
+        const anchor = {
+            scrollWidth: 200,
+            clientWidth: 300,
+            dataset:     { tooltip: 'Title', tooltipDetail: 'https://local.example' },
+            removeAttribute (name) {
+                if (name === 'data-tooltip-detail') delete this.dataset.tooltipDetail
+            },
+        }
+
+        expect(setupDetailsTooltip(anchor)).toBe(true)
+        expect(anchor.dataset).toEqual({ tooltip: 'https://local.example' })
+    })
+
+    test('keeps the title when it is cut off', () => {
+        const anchor = {
+            scrollWidth: 400,
+            clientWidth: 300,
+            dataset:     { tooltip: 'Title', tooltipDetail: 'https://local.example' },
+        }
+
+        expect(setupDetailsTooltip(anchor)).toBe(false)
+        expect(anchor.dataset.tooltip).toBe('Title')
     })
 
     test('scrolls the title without showing details', () => {

@@ -49,7 +49,7 @@ Please rate it on [chrome web store](https://chrome.google.com/webstore/detail/f
 - **Site Icons**: The popup shows Chrome's cached icon instantly, then the site's own icon once it loads.
 
 ### Status Bar
-- **Row Number : Total Count**
+- **Row / Total**: The selected row and the number of saved items.
 - **Archive Icon**: Open the full-page reading list archive.
 - **Options Icon**: Open the unified options page.
 - **Question Icon**: Click to open the documentation & feedback page.

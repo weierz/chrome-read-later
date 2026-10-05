@@ -15,11 +15,11 @@
 }
 
 #reading-list li.active {
-    background: var(--accent-soft);
+    background: var(--selected);
 }
 
 #reading-list li:focus-within {
-    background: var(--accent-soft);
+    background: var(--selected);
 }
 
 #reading-list a {
@@ -82,6 +82,16 @@
     box-sizing: content-box;
 }
 
+/* Theme the delete icon like the status-bar icons. */
+#reading-list img[data-delete-action] {
+    filter: var(--icon-filter);
+    opacity: 0.8;
+}
+
+#reading-list img[data-delete-action]:hover {
+    opacity: 1;
+}
+
 #reading-list .percent {
     font-size: 12px;
     font-weight: 500;
@@ -107,4 +117,33 @@
     #reading-list a.scroll-title.is-overflowing:hover .title-track {
         animation: none;
     }
+}
+
+.empty-state {
+    display: none;
+    padding: 28px 24px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
+}
+
+.empty-state strong {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.empty-state em {
+    font-style: normal;
+    color: var(--text);
+}
+
+/* Shown once every row is gone or hidden after deletion. */
+main:not(:has(#reading-list li:not([style*="none"]))) .empty-state {
+    display: block;
+}
+
+main:not(:has(#reading-list li:not([style*="none"]))) #reading-list {
+    padding: 0;
 }

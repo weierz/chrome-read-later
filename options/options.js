@@ -63,6 +63,7 @@ function bindSidebarNavigation () {
 }
 
 function bindOptionControls () {
+    $('.option-control').on('change', updateOptionHints)
     $('.option-control').on('change', saveOptions)
 }
 
@@ -146,6 +147,20 @@ function readOptions () {
     }
 }
 
+const itemHoverModeHints = {
+    mixed:   'Short titles stay still, longer titles scroll, and very long titles show the title and URL.',
+    details: 'Shows the URL after a short pause, with the full title when it is cut off.',
+    title:   'Titles that are cut off scroll so you can read them in place.',
+    never:   'Titles stay still and no details are shown.',
+}
+
+function updateOptionHints () {
+    $('#itemNewTabHint span').text(
+        $('#itemNewTab').prop('checked') ? 'the current tab' : 'a new tab'
+    )
+    $('#itemHoverModeHint').text(itemHoverModeHints[$('#itemHoverMode').val()] ?? '')
+}
+
 function applyOptions (options) {
     applyFontPreference(options)
     $('#fontFamily').val(options?.fontFamily ?? 'system')
@@ -156,6 +171,7 @@ function applyOptions (options) {
     $('#archiveMode').prop('checked', options?.archiveMode)
     $('#archiveRetentionDays').val(String(options?.archiveRetentionDays ?? 0))
     $('#hybrid').prop('checked', options?.hybrid)
+    updateOptionHints()
 }
 
 async function updateStorageControl (options, syncUnavailable = false, changeId) {

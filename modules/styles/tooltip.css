@@ -10,7 +10,7 @@
     border: 1px solid var(--border-strong);
     border-radius: 6px;
     background-color: var(--surface);
-    box-shadow: 0 4px 12px #443c352e;
+    box-shadow: var(--shadow);
     color: var(--text);
     font: 400 11px/16px var(--font-ui);
     opacity: 0;
@@ -20,6 +20,12 @@
     transition: opacity 120ms ease, transform 120ms ease;
     visibility: hidden;
     white-space: pre-wrap;
+}
+
+.tooltip-detail {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
 }
 
 .tooltip-popup.visible {

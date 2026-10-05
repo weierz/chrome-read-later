@@ -46,9 +46,7 @@
 
     <main class="content">
         <header class="content-header">
-            <div>
-                <h1>Options</h1>
-            </div>
+            <h1 class="visually-hidden">Options</h1>
             <span id="optionsStatus" class="status-text" role="status" aria-live="polite"></span>
         </header>
 
@@ -74,25 +72,25 @@
                 </div>
 
                 <label class="option-row" for="itemNewTab">
-                    <input class="option-control" id="itemNewTab" name="itemNewTab" type="checkbox">
+                    <input class="option-control" id="itemNewTab" name="itemNewTab" type="checkbox" role="switch">
                     <span>
                         <strong>Open reading list items in a new tab</strong>
-                        <small>Hold <kbd>Alt</kbd> to open in the current tab.</small>
+                        <small id="itemNewTabHint">Hold <kbd>Alt</kbd> to open in <span>a new tab</span>.</small>
                     </span>
                 </label>
 
                 <label class="option-row" for="keepSavedTab">
-                    <input class="option-control" id="keepSavedTab" name="keepSavedTab" type="checkbox">
+                    <input class="option-control" id="keepSavedTab" name="keepSavedTab" type="checkbox" role="switch">
                     <span>
                         <strong>Keep the tab open after saving</strong>
-                        <small>Shows “done” after saving.</small>
+                        <small>The Read Later icon shows “done” instead of closing the tab.</small>
                     </span>
                 </label>
 
                 <div class="select-row top-level">
                     <label for="itemHoverMode">
                         <strong>When hovering a reading-list item</strong>
-                        <small>Automatic keeps one-line titles still, scrolls two-line titles at 40 px/s, and shows details for titles needing three or more lines.</small>
+                        <small id="itemHoverModeHint"></small>
                     </label>
                     <select class="option-control" id="itemHoverMode" name="itemHoverMode">
                         <option value="mixed">Automatic by title length</option>
@@ -105,12 +103,12 @@
                 <div class="select-row top-level">
                     <label for="selectedItemIconMode">
                         <strong>Show delete icon for selected item</strong>
-                        <small>Choose when the selected item's favicon becomes a delete button.</small>
+                        <small>The selected item's icon turns into a delete button.</small>
                     </label>
                     <select class="option-control" id="selectedItemIconMode" name="selectedItemIconMode">
-                        <option value="always">Mouse and keyboard</option>
-                        <option value="never">Keep favicon</option>
-                        <option value="mixed">Mouse only</option>
+                        <option value="always">With mouse and keyboard</option>
+                        <option value="mixed">With mouse only</option>
+                        <option value="never">Never</option>
                     </select>
                 </div>
             </div>
@@ -126,7 +124,7 @@
 
             <div class="option-list">
                 <label class="option-row" for="archiveMode">
-                    <input class="option-control" id="archiveMode" name="archiveMode" type="checkbox">
+                    <input class="option-control" id="archiveMode" name="archiveMode" type="checkbox" role="switch">
                     <span>
                         <strong>Keep a reading list archive</strong>
                         <small>Saved items remain available in Archive.</small>
@@ -160,7 +158,7 @@
 
             <div class="option-list">
                 <label class="option-row" for="hybrid">
-                    <input class="option-control" id="hybrid" name="hybrid" type="checkbox">
+                    <input class="option-control" id="hybrid" name="hybrid" type="checkbox" role="switch">
                     <span>
                         <strong>Store overflow items locally</strong>
                         <small>New items stay on this computer when Chrome Sync is full.</small>
@@ -178,6 +176,7 @@
                 </div>
             </header>
 
+            <div class="card card-body">
             <div class="upload-row">
                 <label for="fileInput" class="button secondary-button">
                     Choose file
@@ -192,6 +191,7 @@
             <div class="action-row">
                 <button id="importButton" type="button" disabled>Import reading list</button>
                 <span id="importStatus" class="status-text" role="status" aria-live="polite"></span>
+            </div>
             </div>
         </section>
 
@@ -215,8 +215,10 @@
                 </div>
             </header>
 
-            <pre id="json-output" tabindex="0" aria-label="Export preview"></pre>
-            <span id="exportStatus" class="status-text" role="status" aria-live="polite"></span>
+            <div class="card card-body">
+                <pre id="json-output" tabindex="0" aria-label="Export preview"></pre>
+                <span id="exportStatus" class="status-text" role="status" aria-live="polite"></span>
+            </div>
         </section>
     </main>
 </div>

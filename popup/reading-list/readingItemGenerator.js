@@ -43,6 +43,14 @@ export function setupTitleScroll (anchor) {
     return true
 }
 
+// Titles that fit on one line only need the URL in their tooltip.
+export function setupDetailsTooltip (anchor) {
+    if (anchor.scrollWidth > anchor.clientWidth) return false
+    anchor.dataset.tooltip = anchor.dataset.tooltipDetail
+    anchor.removeAttribute('data-tooltip-detail')
+    return true
+}
+
 export function setupMixedHover (anchor) {
     const title = anchor.querySelector('.title-primary')
     const hoverMode = getMixedHoverMode(
@@ -53,6 +61,7 @@ export function setupMixedHover (anchor) {
 
     anchor.classList.remove('mixed-hover')
     anchor.removeAttribute('data-mixed-tooltip')
+    if (hoverMode !== 'details') anchor.removeAttribute('data-tooltip-detail')
 
     if (hoverMode === 'title') {
         anchor.removeAttribute('data-tooltip-delay')
@@ -96,11 +105,12 @@ export function renderLiFrom (page, {
                 : ''
         if (!attribute) return ''
 
-        const text = page.title === page.url
-            ? page.url
-            : `${page.title}\n\n${page.url}`
         // eslint-disable-next-line no-undef
-        return ` ${attribute}="${he.encode(text)}" data-tooltip-delay="${ITEM_DETAILS_HOVER_DELAY}"`
+        const encode = he.encode
+        const detail = page.title === page.url
+            ? ''
+            : ` data-tooltip-detail="${encode(page.url)}"`
+        return ` ${attribute}="${encode(page.title)}"${detail} data-tooltip-delay="${ITEM_DETAILS_HOVER_DELAY}"`
     }
 
     function getTextClass () {
