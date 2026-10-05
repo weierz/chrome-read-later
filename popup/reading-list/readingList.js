@@ -80,17 +80,30 @@ function updateStateOnMouseMove () {
         const pointer = `${screenX},${screenY}`
         if (pointer === lastPointer) return
         lastPointer = pointer
+        if (isPartlyHidden(currentTarget)) return
         const li = $(currentTarget)
         action.reactive(li, 'mouse')
-        // Reveal a row hovered at the clipped edge so its highlight shows.
-        action.scrollTo(li)
         action.updateRowNumber()
     })
+}
+
+// Rows cut off by the clipped list padding would show almost no highlight.
+function isPartlyHidden (li) {
+    const list = readingList[0]
+    const padding = parseFloat(getComputedStyle(list).paddingTop)
+    const listRect = list.getBoundingClientRect()
+    const rect = li.getBoundingClientRect()
+    return rect.top < listRect.top + padding - 0.5
+        || rect.bottom > listRect.bottom - padding + 0.5
 }
 
 function doActionOnMouseClick () {
     readingList.on('click', event => {
         event.preventDefault()
+        // Hover skips partly hidden rows, so a click there would open the
+        // previously selected item instead.
+        const li = event.target.closest('li')
+        if (li && !li.classList.contains('active') && isPartlyHidden(li)) return
 
         try {
             const clickType = filter.getClickType(event, 'readingList')
