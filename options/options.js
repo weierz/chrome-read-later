@@ -139,6 +139,7 @@ function readOptions () {
         keepSavedTab:         $('#keepSavedTab').prop('checked'),
         itemHoverMode:        $('#itemHoverMode').val(),
         selectedItemIconMode: $('#selectedItemIconMode').val(),
+        countFormat:          $('#countFormat').val(),
         archiveMode:          $('#archiveMode').prop('checked'),
         archiveRetentionDays: Number($('#archiveRetentionDays').val()),
         hybrid:               $('#hybrid').prop('checked'),
@@ -167,6 +168,7 @@ function applyOptions (options) {
     $('#keepSavedTab').prop('checked', options?.keepSavedTab)
     $('#itemHoverMode').val(options?.itemHoverMode)
     $('#selectedItemIconMode').val(options?.selectedItemIconMode)
+    $('#countFormat').val(options?.countFormat ?? 'slash')
     $('#archiveMode').prop('checked', options?.archiveMode)
     $('#archiveRetentionDays').val(String(options?.archiveRetentionDays ?? 0))
     $('#hybrid').prop('checked', options?.hybrid)

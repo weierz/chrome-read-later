@@ -224,6 +224,9 @@ export async function getOptions () {
         selectedItemIconMode: localOptions?.selectedItemIconMode
             ?? syncOptions?.selectedItemIconMode
             ?? 'always',
+        countFormat: localOptions?.countFormat
+            ?? syncOptions?.countFormat
+            ?? 'slash',
         fontFamily: normalizeFontFamily(
             localOptions?.fontFamily ?? syncOptions?.fontFamily
         ),
@@ -274,6 +277,7 @@ export async function setOptions (options) {
     delete syncOptions.hybrid
     delete syncOptions.itemHoverMode
     delete syncOptions.selectedItemIconMode
+    delete syncOptions.countFormat
     delete syncOptions.fontFamily
     delete syncOptions.archiveMode
     delete syncOptions.archiveRetentionDays

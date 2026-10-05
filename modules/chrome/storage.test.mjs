@@ -134,6 +134,7 @@ describe('hybrid reading list storage', () => {
 
         expect(options.itemHoverMode).toBe('details')
         expect(options.selectedItemIconMode).toBe('always')
+        expect(options.countFormat).toBe('slash')
         expect(options.archiveMode).toBe(true)
         expect(options.archiveRetentionDays).toBe(0)
     })
@@ -270,6 +271,15 @@ describe('hybrid reading list storage', () => {
         ).toBe('mixed')
         expect(
             (await storage.sync.get('options')).options.selectedItemIconMode
+        ).toBeUndefined()
+    })
+
+    test('keeps the count format local', async () => {
+        await storage.setOptions({ countFormat: 'total' })
+
+        expect((await storage.local.get('options')).options.countFormat).toBe('total')
+        expect(
+            (await storage.sync.get('options')).options.countFormat
         ).toBeUndefined()
     })
 

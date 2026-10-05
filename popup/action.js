@@ -125,25 +125,25 @@ export const scrollTo = (li) => {
     li[0].scrollIntoView({ block: 'nearest' })
 }
 
-export const updateTotalNumber = () => {
-    const ul = visibleLis()
-    $('#total').text(ul.length)
-    updateCountTooltip()
-}
+export const updateTotalNumber = () => updateCount()
 
-export const updateRowNumber = () => {
-    const rowNumber = visibleLis().index(activeLi()) + 1
-    $('#row').text(rowNumber)
-    updateCountTooltip()
-}
+export const updateRowNumber = () => updateCount()
 
-const updateCountTooltip = () => {
+const countSeparators = { slash: ' / ', colon: ':' }
+
+const updateCount = () => {
     const items = visibleLis()
     const row = items.index(activeLi()) + 1
     const total = items.length
-    const current = `${row}:${total}`
+    const separator = countSeparators[window.options?.countFormat ?? 'slash']
     const count = $('#count')
 
+    $('#row').text(row)
+    $('#total').text(total)
+    count.attr('data-format', separator ? 'position' : 'total')
+    count.find('.count-separator').text(separator ?? '')
+
+    const current = separator ? `${row}${separator}${total}` : `${total}`
     const local = items.filter('.local-overflow').length
     const synced = total - local
     const text = `${current} (${synced} synced + ${local} local)`

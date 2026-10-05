@@ -14,8 +14,8 @@ export function setup () {
 
 function init () {
     const archive = window.options?.archiveMode
-        ? `<li><button type="button" id="archive" data-tooltip="Open reading list archive"
-               aria-label="Open reading list archive">
+        ? `<li><button type="button" id="archive" data-tooltip="Open reading list archive (A)"
+               aria-label="Open reading list archive" aria-keyshortcuts="A">
               <img src="../../icons/archive.svg" alt="">
            </button>
            </li>`
@@ -23,16 +23,17 @@ function init () {
 
     $('#status-bar').append(`
      <li id="count" aria-label="Reading list count">
-        <span id="row">0</span><span class="count-separator" aria-hidden="true">/</span><span id="total">0</span>
+        <span id="row">0</span><span class="count-separator" aria-hidden="true"> / </span><span id="total">0</span>
      </li>
      ${archive}
-     <li><button type="button" id="options" data-tooltip="Options"
-         aria-label="Options">
+     <li><button type="button" id="options" data-tooltip="Options (,)"
+         aria-label="Options" aria-keyshortcuts=",">
         <img src="../../icons/options.svg" alt="">
      </button>
      </li>
      <li><button type="button" id="question"
-         data-tooltip="Help and feedback" aria-label="Help and feedback">
+         data-tooltip="Help and feedback (?)" aria-label="Help and feedback"
+         aria-keyshortcuts="?">
         <img src="../../icons/question.svg" alt="">
      </button>
      </li>

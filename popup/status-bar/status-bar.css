@@ -40,8 +40,12 @@
 }
 
 #status-bar .count-separator {
-    margin: 0 3px;
+    white-space: pre;
     opacity: 0.6;
+}
+
+#status-bar #count[data-format="total"] :is(#row, .count-separator) {
+    display: none;
 }
 
 #status-bar img {
