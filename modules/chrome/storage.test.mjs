@@ -325,6 +325,31 @@ describe('hybrid reading list storage', () => {
         expect((await storage.getOptions()).fontFamily).toBe('system')
     })
 
+    test('saving the font keeps other synced options and saved pages', async () => {
+        await storage.sync.set({
+            options: { itemNewTab: true, keepSavedTab: true, fontFamily: 'avenir', isOptions: true },
+            'https://example.com/kept': page('https://example.com/kept', 1),
+        })
+
+        await storage.setOptions({ fontFamily: 'monospace' })
+
+        const synced = await storage.sync.get(['options', 'https://example.com/kept'])
+        expect(synced.options.itemNewTab).toBe(true)
+        expect(synced.options.keepSavedTab).toBe(true)
+        expect(synced.options.fontFamily).toBeUndefined()
+        expect(synced['https://example.com/kept'].url).toBe('https://example.com/kept')
+        expect((await storage.getOptions()).fontFamily).toBe('monospace')
+    })
+
+    test('keeps the font locally when Chrome Sync rejects the options write', async () => {
+        syncArea.failNextSet()
+
+        const result = await storage.setOptions({ fontFamily: 'serif' })
+
+        expect(result.syncError).toBeDefined()
+        expect((await storage.getOptions()).fontFamily).toBe('serif')
+    })
+
     test('normalizes invalid font input before saving', async () => {
         const result = await storage.setOptions({ fontFamily: { family: 'serif' } })
 

@@ -1,0 +1,93 @@
+[
+  {
+    "url": "https://example.com/review/article",
+    "title": "[9.3.0 REVIEW] Valid https article",
+    "timestamp": "2026-10-01T09:00:00Z",
+    "scroll": {
+      "top": 400,
+      "height": 2000,
+      "percent": "40%"
+    }
+  },
+  {
+    "url": "options",
+    "title": "[9.3.0 REVIEW] INVALID reserved options key (must not change settings)",
+    "itemNewTab": false,
+    "archiveMode": false,
+    "hybrid": true
+  },
+  {
+    "url": "  https://example.com/review/padded  ",
+    "title": "[9.3.0 REVIEW] Valid URL with surrounding spaces (saved trimmed)"
+  },
+  {
+    "url": "saved:https://example.com/review/reserved",
+    "title": "[9.3.0 REVIEW] INVALID reserved saved: prefix"
+  },
+  {
+    "url": "http://example.org/review/plain-http",
+    "title": "[9.3.0 REVIEW] Valid http page"
+  },
+  {
+    "url": "example.com/review/no-scheme",
+    "title": "[9.3.0 REVIEW] INVALID missing scheme"
+  },
+  {
+    "url": "https://www.youtube.com/watch?v=fnaFiMabPq8",
+    "title": "[9.3.0 REVIEW] Valid video with progress",
+    "video": {
+      "currentTime": 60,
+      "playbackRate": 1,
+      "percent": "35%"
+    }
+  },
+  {
+    "url": "//example.com/review/protocol-relative",
+    "title": "[9.3.0 REVIEW] INVALID protocol-relative"
+  },
+  {
+    "url": "file:///Users/Shared/read-later-review.html",
+    "title": "[9.3.0 REVIEW] Valid local file"
+  },
+  {
+    "url": "javascript:alert(1)",
+    "title": "[9.3.0 REVIEW] INVALID javascript URL"
+  },
+  {
+    "url": "chrome://extensions/",
+    "title": "[9.3.0 REVIEW] Valid chrome page"
+  },
+  {
+    "url": "data:text/html,<h1>Review</h1>",
+    "title": "[9.3.0 REVIEW] INVALID data URL"
+  },
+  {
+    "url": "chrome-extension://abcdefghijklmnopabcdefghijklmnop/options/options.html",
+    "title": "[9.3.0 REVIEW] Valid extension page"
+  },
+  {
+    "url": "ftp://example.com/review/file.txt",
+    "title": "[9.3.0 REVIEW] INVALID unsupported ftp scheme"
+  },
+  {
+    "url": "about:blank",
+    "title": "[9.3.0 REVIEW] Valid about page"
+  },
+  {
+    "url": 12345,
+    "title": "[9.3.0 REVIEW] INVALID number URL"
+  },
+  {
+    "url": {
+      "href": "https://example.com/review/object"
+    },
+    "title": "[9.3.0 REVIEW] INVALID object URL"
+  },
+  {
+    "url": "   ",
+    "title": "[9.3.0 REVIEW] INVALID blank URL"
+  },
+  {
+    "url": "https://example.com/review/no-title"
+  }
+]

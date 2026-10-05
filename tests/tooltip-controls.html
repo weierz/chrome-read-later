@@ -77,6 +77,33 @@ try {
     check(tooltip.classList.contains('visible'), 'Pointer can cross gap into tooltip')
     tooltip.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
     check(!tooltip.classList.contains('visible'), 'Escape dismisses tooltip')
+    // 9.3.0 review: Escape, status-bar routing, and typing inside a tooltip.
+    const noTooltipEscape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+    document.body.dispatchEvent(noTooltipEscape)
+    check(!noTooltipEscape.defaultPrevented, 'Escape is not blocked when no tooltip is open, so the popup can close')
+    for (const [id, expected] of [['archive', '/archive/archive.html'], ['question', 'github.com']]) {
+        calls.length = 0
+        const opened = []
+        const originalOpen = window.open, originalClose = window.close
+        window.open = url => { opened.push(String(url)) }
+        window.close = () => {}
+        document.querySelector(`button#${id}`).click()
+        await wait(20)
+        window.open = originalOpen
+        window.close = originalClose
+        const targets = [...calls.map(call => call.url ?? call.data?.url ?? JSON.stringify(call)), ...opened]
+        check(targets.some(url => url?.includes(expected)), `${id} button opens ${expected}`)
+    }
+    calls.length = 0
+    const firstItem = document.querySelector('#reading-list li')
+    trigger.focus()
+    await wait(30)
+    tooltip.focus()
+    for (const key of ['d', 'd', 'Delete', 'Enter', 'o']) {
+        tooltip.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+    }
+    await wait(50)
+    check(calls.length === 0 && firstItem.isConnected && firstItem.style.display !== 'none', 'Typing inside a focused tooltip does not open or delete the selected item')
     document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
     // Native keyboard smoke test: focus Options and press Enter or Space.
     // The on-screen counter should increment without a saved article disappearing.

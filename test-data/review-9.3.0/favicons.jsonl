@@ -1,0 +1,11 @@
+{"url": "https://github.com/willbchang/chrome-read-later", "title": "[9.3.0 FAVICON] Site icon available (GitHub)", "timestamp": "2026-10-02T09:00:00Z"}
+{"url": "https://developer.mozilla.org/en-US/docs/Web", "title": "[9.3.0 FAVICON] Site icon available (MDN)", "timestamp": "2026-10-02T09:01:00Z"}
+{"url": "https://en.wikipedia.org/wiki/Favicon", "title": "[9.3.0 FAVICON] Site icon available (Wikipedia)", "timestamp": "2026-10-02T09:02:00Z"}
+{"url": "https://news.ycombinator.com/", "title": "[9.3.0 FAVICON] Small legacy favicon (Hacker News)", "timestamp": "2026-10-02T09:03:00Z"}
+{"url": "https://www.youtube.com/watch?v=fnaFiMabPq8", "title": "[9.3.0 FAVICON] Video page icon (YouTube)", "timestamp": "2026-10-02T09:04:00Z"}
+{"url": "https://example.com/review/no-favicon", "title": "[9.3.0 FAVICON] Site without a favicon (example.com)", "timestamp": "2026-10-02T09:05:00Z"}
+{"url": "https://read-later-review.invalid/article", "title": "[9.3.0 FAVICON] Domain that does not resolve", "timestamp": "2026-10-02T09:06:00Z"}
+{"url": "http://localhost:8765/review", "title": "[9.3.0 FAVICON] Localhost page", "timestamp": "2026-10-02T09:07:00Z"}
+{"url": "http://intranet.review.local/wiki", "title": "[9.3.0 FAVICON] Intranet-style host", "timestamp": "2026-10-02T09:08:00Z"}
+{"url": "file:///Users/Shared/read-later-review.html", "title": "[9.3.0 FAVICON] Local file (no site icon request)", "timestamp": "2026-10-02T09:09:00Z"}
+{"url": "chrome://extensions/", "title": "[9.3.0 FAVICON] Chrome page (no site icon request)", "timestamp": "2026-10-02T09:10:00Z"}

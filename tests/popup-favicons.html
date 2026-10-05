@@ -1,0 +1,99 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Popup favicon regression tests</title>
+<link rel="stylesheet" href="../popup/popup.css">
+<style>body { width: 400px; } #results { white-space: pre-wrap; padding: 16px; }</style>
+<script src="../modules/libraries/jquery.min.js"></script>
+<script src="../modules/libraries/he.min.js"></script>
+<ul id="reading-list"></ul>
+<pre id="results">Running…</pre>
+<script type="module">
+// Run with a static server at the repository root. Chrome APIs and site icon
+// loads are mocked, so each load can finish or fail at a chosen moment.
+const pageAt = (url, date) => ({ url, title: url, date, scroll: { top: 0 }, video: {},
+    favIconUrl: 'https://stored.example/favicon.png' })
+const pages = [
+    pageAt('https://alpha.example/a', 4),
+    pageAt('https://beta.example/b', 3),
+    pageAt('https://gamma.example/c', 2),
+    pageAt('file:///Users/Shared/read-later-review.html', 1),
+]
+const area = data => ({ get(key, callback) {
+    callback(key == null ? data : (key in data ? { [key]: data[key] } : {}))
+} })
+window.chrome = {
+    storage: { sync: area(Object.fromEntries(pages.map(page => [page.url, page]))),
+        local: area({}), session: area({}) },
+    runtime: { id: 'extension-id', getURL: path => new URL('/' + path, location.href).href,
+        sendMessage () {} },
+}
+window.options = { selectedItemIconMode: 'always', itemHoverMode: 'never' }
+window.localOverflowUrls = new Set()
+window.isHidingLi = false
+window.lastKey = ''
+
+const siteLoads = []
+window.Image = class {
+    set src (value) { this.url = value; siteLoads.push(this) }
+    get src () { return this.url }
+}
+const loadFor = host => siteLoads.find(load => load.url.includes(encodeURIComponent(`https://${host}`)))
+const finish = host => loadFor(host).onload?.()
+const fail = host => loadFor(host).onerror?.()
+
+const results = []
+const check = (condition, label) => {
+    if (!condition) throw new Error(label)
+    results.push('PASS: ' + label)
+}
+const icon = host => document.querySelector(`#reading-list li a[href*="${host}"]`)
+    .closest('li').querySelector('img')
+const isDelete = image => image.src.includes('delete-')
+const isChrome = image => image.src.startsWith('chrome-extension://extension-id/_favicon/')
+const isSite = image => image.src.startsWith('https://t0.gstatic.com/faviconV2')
+
+try {
+    const readingList = await import('../popup/reading-list/readingList.js')
+    const action = await import('../popup/action.js')
+    await readingList.setup()
+    const li = host => $(icon(host).closest('li'))
+
+    check(isChrome(icon('beta.example')) && !icon('beta.example').src.includes('stored.example'),
+        "Rows start with Chrome's cached icon, not the stored favicon URL")
+    check(siteLoads.length === 3, 'Site icons are requested only for http and https pages')
+    check(icon('read-later-review.html').dataset.siteFaviconSrc === '', 'Local files skip the site icon service')
+
+    // Selected row: the site icon arrives while the delete icon is showing.
+    check(isDelete(icon('alpha.example')), 'First row shows the delete icon when selected')
+    finish('alpha.example')
+    check(isDelete(icon('alpha.example')), 'Site icon arriving does not hide the delete icon')
+    action.reactive(li('beta.example'), 'mouse')
+    check(isSite(icon('alpha.example')), 'Deselecting restores the site icon that arrived meanwhile')
+
+    // Selected, then deselected, before the site icon arrives.
+    check(isDelete(icon('beta.example')), 'Second row shows the delete icon when selected')
+    action.reactive(li('gamma.example'), 'mouse')
+    check(isChrome(icon('beta.example')), "Deselecting before loading restores Chrome's icon")
+    finish('beta.example')
+    check(isSite(icon('beta.example')), 'Site icon replaces Chrome icon after the row was deselected')
+    action.reactive(li('beta.example'), 'mouse')
+    action.reactive(li('alpha.example'), 'mouse')
+    check(isSite(icon('beta.example')), 'Reselecting and deselecting keeps the site icon')
+
+    // Failed site icon: Chrome's icon stays.
+    action.reactive(li('alpha.example'), 'mouse')
+    fail('gamma.example')
+    check(isChrome(icon('gamma.example')), "A failed site icon keeps Chrome's icon")
+    action.reactive(li('gamma.example'), 'mouse')
+    action.reactive(li('alpha.example'), 'mouse')
+    check(isChrome(icon('gamma.example')), "Selection after a failed load restores Chrome's icon")
+
+    // Keep favicon mode never swaps in the delete icon.
+    window.options.selectedItemIconMode = 'never'
+    action.reactive(li('beta.example'), 'keyboard')
+    check(isSite(icon('beta.example')), 'Keep favicon mode leaves the site icon in place')
+    document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
+} catch (error) {
+    document.querySelector('#results').textContent = results.join('\n') + '\nFAIL: ' + error.stack
+}
+</script>

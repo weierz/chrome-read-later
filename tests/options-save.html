@@ -19,7 +19,13 @@ function mockChrome() {
             set(value, callback) {
                 const snapshot = structuredClone(value)
                 setTimeout(() => {
-                    if (name === 'local' && state.failures) {
+                    if (name === 'local' && state.failWhen?.(snapshot.options)) {
+                    chrome.runtime.lastError = { message: 'Test write failure' }
+                    callback()
+                    delete chrome.runtime.lastError
+                    return
+                }
+                if (name === 'local' && state.failures) {
                         state.failures--
                         chrome.runtime.lastError = { message: 'Test write failure' }
                         callback()
@@ -105,6 +111,33 @@ try {
     chooseFont('system')
     await waitFor(() => status.textContent === 'Saved')
     check(w.getComputedStyle(d.body).fontFamily.startsWith('system-ui'), 'System font can be restored')
+    // 9.3.0 review: a failure while another save is queued.
+    const saveCount = () => w.testState.writes.length
+    const newTab = first.checked, keep = second.checked
+    let writes = saveCount()
+    w.testState.failWhen = options => options?.itemNewTab === !newTab && options?.keepSavedTab === keep
+    first.click()
+    second.click()
+    await waitFor(() => status.textContent === 'Saved' && saveCount() > writes)
+    w.testState.failWhen = undefined
+    check(first.checked === !newTab && second.checked === !keep, 'Older failed save does not revert a newer queued edit')
+    check(w.testState.writes.at(-1).itemNewTab === !newTab && w.testState.writes.at(-1).keepSavedTab === !keep, 'Newer queued edit persists both changes after an older failure')
+    writes = saveCount()
+    w.testState.failWhen = options => options?.itemNewTab === newTab && options?.keepSavedTab === keep
+    first.click()
+    second.click()
+    await waitFor(() => status.textContent === 'Could not save these options.')
+    w.testState.failWhen = undefined
+    check(first.checked === newTab && second.checked === !keep, 'Newest failed save restores the last successful values')
+    check(!first.disabled && !second.disabled, 'Controls stay enabled after a queued failure')
+    const hybrid = d.querySelector('#hybrid'), storageStatus = d.querySelector('#storageStatus')
+    const hybridBefore = hybrid.checked
+    hybrid.click()
+    await waitFor(() => status.textContent === 'Saved')
+    check(storageStatus.textContent === (hybridBefore ? 'Using Chrome Sync only.' : 'Using Chrome Sync with local overflow.'), 'Storage mode status follows the saved mode')
+    hybrid.click()
+    await waitFor(() => storageStatus.textContent === (hybridBefore ? 'Using Chrome Sync with local overflow.' : 'Using Chrome Sync only.'))
+    check(hybrid.checked === hybridBefore, 'Storage mode can be switched back')
     document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
 } catch (error) {
     document.querySelector('#results').textContent = results.join('\n') + '\nFAIL: ' + error.stack

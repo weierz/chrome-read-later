@@ -102,3 +102,52 @@ describe('import URL validation', () => {
         expect(pages.map(page => page.url).sort()).toEqual([...urls].sort())
     })
 })
+
+describe('9.3.0 review fixtures', () => {
+    const fixture = name => readFileSync(
+        new URL(`../test-data/review-9.3.0/${name}`, import.meta.url), 'utf8'
+    )
+    const expectedUrls = [
+        'https://example.com/review/article',
+        'https://example.com/review/padded',
+        'http://example.org/review/plain-http',
+        'https://www.youtube.com/watch?v=fnaFiMabPq8',
+        'file:///Users/Shared/read-later-review.html',
+        'chrome://extensions/',
+        'chrome-extension://abcdefghijklmnopabcdefghijklmnop/options/options.html',
+        'about:blank',
+    ]
+
+    async function importFixture (name) {
+        const context = importContext()
+        await vm.runInContext('storage.setOptions({ itemNewTab: true, archiveMode: true, hybrid: false })', context)
+        context.importContent = fixture(name)
+        const result = await vm.runInContext('importItems(importContent)', context)
+        const pages = await vm.runInContext('storage.sortSavedByLatest()', context)
+        const options = await vm.runInContext('storage.getOptions()', context)
+        return { result, pages, options }
+    }
+
+    for (const [name, failed] of [['import-mixed.json', 11], ['import-mixed.jsonl', 12]]) {
+        test(`${name} imports only valid entries and keeps settings`, async () => {
+            const { result, pages, options } = await importFixture(name)
+
+            expect(result.success).toBe(expectedUrls.length)
+            expect(result.failed).toBe(failed)
+            expect(pages.map(page => page.url).sort()).toEqual([...expectedUrls].sort())
+            expect(options.itemNewTab).toBe(true)
+            expect(options.archiveMode).toBe(true)
+            expect(options.hybrid).toBe(false)
+        })
+    }
+
+    test('keeps imported reading and video progress', async () => {
+        const { pages } = await importFixture('import-mixed.json')
+        const byUrl = Object.fromEntries(pages.map(page => [page.url, page]))
+
+        expect(byUrl['https://example.com/review/article'].scroll.percent).toBe('40%')
+        expect(byUrl['https://www.youtube.com/watch?v=fnaFiMabPq8'].video.percent).toBe('35%')
+        expect(byUrl['https://example.com/review/article'].date)
+            .toBe(Date.parse('2026-10-01T09:00:00Z'))
+    })
+})
