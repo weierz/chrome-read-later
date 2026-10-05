@@ -17,7 +17,7 @@
     --warning: #9a6700;
     --error: #cf222e;
     --video: #0969da;
-    --local: #6e5c99;
+    --local: color-mix(in srgb, var(--accent) 40%, var(--muted));
     --icon-filter: opacity(0.65);
     --shadow: 0 4px 14px rgb(0 0 0 / 12%);
     --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
@@ -87,7 +87,6 @@ select:hover:not(:disabled) {
         --warning: #e3b341;
         --error: #ff7b72;
         --video: #79b8ff;
-        --local: #a99dc6;
         --icon-filter: invert(88%);
         --shadow: 0 4px 14px rgb(0 0 0 / 45%);
         --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23a8adb4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
