@@ -82,6 +82,8 @@ function updateStateOnMouseMove () {
         lastPointer = pointer
         const li = $(currentTarget)
         action.reactive(li, 'mouse')
+        // Reveal a row hovered at the clipped edge so its highlight shows.
+        action.scrollTo(li)
         action.updateRowNumber()
     })
 }
