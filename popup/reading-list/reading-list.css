@@ -4,6 +4,8 @@
     font-size: 14px;
     list-style: none;
     padding: 6px;
+    /* Rows scrolled into the top or bottom padding stay hidden and unhoverable. */
+    clip-path: inset(6px 0);
 }
 
 #reading-list li {
