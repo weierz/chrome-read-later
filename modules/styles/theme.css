@@ -19,6 +19,8 @@
     --video: #0969da;
     --icon-filter: opacity(0.65);
     --shadow: 0 4px 14px rgb(0 0 0 / 12%);
+    --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+    --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%236b7178' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --font-ui: system-ui, -apple-system,
         BlinkMacSystemFont, "Segoe UI", sans-serif;
     accent-color: var(--accent);
@@ -26,7 +28,39 @@
 
 :focus-visible {
     outline: 2px solid var(--accent);
-    outline-offset: 3px;
+    outline-offset: 2px;
+}
+
+/* Text fields and selects show focus with their own border and glow. */
+select,
+textarea,
+input:not([type="checkbox"], [type="radio"], [type="file"]) {
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+select:focus-visible,
+textarea:focus-visible,
+input:not([type="checkbox"], [type="radio"], [type="file"]):focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: var(--focus-ring);
+}
+
+select {
+    height: 34px;
+    padding: 0 30px 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface) var(--chevron) no-repeat right 11px center / 10px 6px;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    appearance: none;
+}
+
+select:hover:not(:disabled) {
+    border-color: var(--border-strong);
 }
 
 ::selection {
@@ -54,5 +88,6 @@
         --video: #79b8ff;
         --icon-filter: invert(88%);
         --shadow: 0 4px 14px rgb(0 0 0 / 45%);
+        --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23a8adb4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     }
 }

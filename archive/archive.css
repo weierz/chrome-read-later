@@ -143,10 +143,14 @@ h1 {
     width: 100%;
     height: 40px;
     padding: 8px 12px;
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border);
     border-radius: 7px;
     background: var(--surface);
     color: var(--text);
+}
+
+.search-field input:hover {
+    border-color: var(--border-strong);
 }
 
 .search-field input::placeholder {
@@ -154,8 +158,9 @@ h1 {
 }
 
 .search-field input:focus {
+    outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+    box-shadow: var(--focus-ring);
 }
 
 .result-summary,

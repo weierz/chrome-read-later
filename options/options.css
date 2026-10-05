@@ -28,8 +28,8 @@ button,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
-    padding: 8px 14px;
+    min-height: 34px;
+    padding: 6px 14px;
     border: 1px solid var(--accent);
     border-radius: 7px;
     background: var(--accent);
@@ -319,15 +319,6 @@ small {
     width: 220px;
 }
 
-select {
-    min-height: 38px;
-    padding: 7px 34px 7px 10px;
-    border: 1px solid var(--border-strong);
-    border-radius: 7px;
-    background: var(--surface);
-    color: var(--text);
-}
-
 select:disabled,
 input:disabled {
     cursor: not-allowed;
@@ -390,7 +381,7 @@ input:disabled {
     min-height: 200px;
     margin: 0 0 12px;
     padding: 14px;
-    border: 1px solid var(--border-strong);
+    border: 1px solid var(--border);
     border-radius: 7px;
     background: var(--surface-subtle);
     color: var(--text);
