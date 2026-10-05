@@ -7,7 +7,7 @@
 // Serve from the repository root. Uses the actual options page with delayed,
 // mocked Chrome storage; no installed extension data is read or changed.
 function mockChrome() {
-    const state = window.testState = { writes: [], failures: 0 }
+    const state = window.testState = { writes: [], failures: 0, pending: 0 }
     const area = name => {
         const data = {}
         return {
@@ -18,15 +18,12 @@ function mockChrome() {
             },
             set(value, callback) {
                 const snapshot = structuredClone(value)
+                state.pending++
                 setTimeout(() => {
-                    if (name === 'local' && state.failWhen?.(snapshot.options)) {
-                    chrome.runtime.lastError = { message: 'Test write failure' }
-                    callback()
-                    delete chrome.runtime.lastError
-                    return
-                }
-                if (name === 'local' && state.failures) {
-                        state.failures--
+                    state.pending--
+                    const failed = name === 'local'
+                        && (state.failWhen?.(snapshot.options) || (state.failures && state.failures--))
+                    if (failed) {
                         chrome.runtime.lastError = { message: 'Test write failure' }
                         callback()
                         delete chrome.runtime.lastError
@@ -70,15 +67,22 @@ try {
     await waitFor(() => d.querySelector('#itemHoverMode').value === 'details')
     const first = d.querySelector('#itemNewTab'), second = d.querySelector('#keepSavedTab')
     const status = d.querySelector('#optionsStatus')
+    // Successful saves show no message, so wait for queued writes to finish.
+    const settled = async () => {
+        await new Promise(resolve => setTimeout(resolve, 30))
+        await waitFor(() => w.testState.pending === 0)
+    }
     const top = (d.querySelector('#general').getBoundingClientRect().top + w.scrollY)
     first.focus()
     first.click()
     check(!first.disabled && !second.disabled, 'Saving does not disable or dim the form')
     check(d.activeElement === first, 'Saving preserves keyboard focus')
     check((d.querySelector('#general').getBoundingClientRect().top + w.scrollY) === top, 'Save status does not shift the settings layout')
+    check(status.textContent === '', 'Saving shows no status message')
     second.click()
     first.click()
-    await waitFor(() => status.textContent === 'Saved')
+    await settled()
+    check(status.textContent === '', 'Successful saves show no status message')
     const saved = w.testState.writes.at(-1)
     check(saved.itemNewTab === false && saved.keepSavedTab === true, 'Rapid edits persist the latest values')
     check(first.checked === false && second.checked === true, 'Older save results do not overwrite the form')
@@ -88,9 +92,9 @@ try {
     await waitFor(() => status.textContent === 'Could not save these options.')
     check(second.checked === true && !second.disabled, 'Failed write restores the previous value without locking controls')
     second.click()
-    await waitFor(() => status.textContent === 'Saved')
+    await settled()
     check(w.testState.writes.at(-1).keepSavedTab === false, 'A failed write does not block subsequent saves')
-    await waitFor(() => status.textContent === '')
+    check(status.textContent === '', 'A successful save clears an earlier error')
     check((d.querySelector('#general').getBoundingClientRect().top + w.scrollY) === top, 'Clearing save status does not shift the settings layout')
     const font = d.querySelector('#fontFamily')
     check(font.value === 'system', 'Interface font defaults to the system font')
@@ -99,7 +103,7 @@ try {
         font.dispatchEvent(new w.Event('change', { bubbles: true }))
     }
     chooseFont('monospace')
-    await waitFor(() => status.textContent === 'Saved')
+    await settled()
     const local = await new Promise(resolve => w.chrome.storage.local.get('options', resolve))
     check(local.options.fontFamily === 'monospace', 'Font preference is saved and read back from local storage')
     check(!Object.hasOwn(w.testState.writes.at(-1), 'fontFamily'), 'Font preference stays specific to this computer')
@@ -109,7 +113,7 @@ try {
     await waitFor(() => status.textContent === 'Could not save these options.')
     check(font.value === 'monospace' && w.getComputedStyle(d.body).fontFamily.includes('monospace'), 'Failed font save restores the previous font and selection')
     chooseFont('system')
-    await waitFor(() => status.textContent === 'Saved')
+    await settled()
     check(w.getComputedStyle(d.body).fontFamily.startsWith('system-ui'), 'System font can be restored')
     // 9.3.0 review: a failure while another save is queued.
     const saveCount = () => w.testState.writes.length
@@ -118,7 +122,7 @@ try {
     w.testState.failWhen = options => options?.itemNewTab === !newTab && options?.keepSavedTab === keep
     first.click()
     second.click()
-    await waitFor(() => status.textContent === 'Saved' && saveCount() > writes)
+    await settled()
     w.testState.failWhen = undefined
     check(first.checked === !newTab && second.checked === !keep, 'Older failed save does not revert a newer queued edit')
     check(w.testState.writes.at(-1).itemNewTab === !newTab && w.testState.writes.at(-1).keepSavedTab === !keep, 'Newer queued edit persists both changes after an older failure')
@@ -133,7 +137,7 @@ try {
     const hybrid = d.querySelector('#hybrid'), storageStatus = d.querySelector('#storageStatus')
     const hybridBefore = hybrid.checked
     hybrid.click()
-    await waitFor(() => status.textContent === 'Saved')
+    await settled()
     check(storageStatus.textContent === (hybridBefore ? 'Using Chrome Sync only.' : 'Using Chrome Sync with local overflow.'), 'Storage mode status follows the saved mode')
     hybrid.click()
     await waitFor(() => storageStatus.textContent === (hybridBefore ? 'Using Chrome Sync with local overflow.' : 'Using Chrome Sync only.'))

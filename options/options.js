@@ -10,7 +10,6 @@ import {
 
 let currentOptions
 let exportItems = []
-let optionsStatusTimer
 let optionsSaveQueue = Promise.resolve()
 let optionsChangeId = 0
 
@@ -81,9 +80,8 @@ async function loadOptions () {
 function saveOptions () {
     const nextOptions = readOptions()
     const changeId = ++optionsChangeId
-    clearTimeout(optionsStatusTimer)
     enableAvailableOptionControls()
-    setStatus($('#optionsStatus'), 'Saving…')
+    setStatus($('#optionsStatus'), '')
     // Keep controls usable while serializing writes. Older results must not
     // replace newer edits that are already visible in the form.
     optionsSaveQueue = optionsSaveQueue.then(() => persistOptions(nextOptions, changeId))
@@ -116,7 +114,7 @@ async function persistOptions (nextOptions, changeId) {
                 'warning'
             )
         } else {
-            showTemporaryOptionsStatus('Saved', 'success')
+            setStatus($('#optionsStatus'), '')
         }
     } catch (error) {
         console.error('Read Later: unable to save options.', error)
@@ -426,15 +424,6 @@ function downloadExport () {
 
 function getExportOutput () {
     return serializeReadingList(exportItems, $('#exportFormat').val())
-}
-
-function showTemporaryOptionsStatus (message, type) {
-    clearTimeout(optionsStatusTimer)
-    setStatus($('#optionsStatus'), message, type)
-    optionsStatusTimer = setTimeout(
-        () => setStatus($('#optionsStatus'), ''),
-        2000
-    )
 }
 
 function setStatus ($element, message, type = '') {
