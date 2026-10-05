@@ -39,14 +39,26 @@ function mockChrome () {
         scroll: { top: read ? 400 : 0, percent: `${read}%` },
         video: video ? { percent: `${video}%` } : {},
     }]))
-    const area = initial => {
+    // The last three pages overflowed a full Chrome Sync and live only locally.
+    const urls = Object.keys(pages)
+    const syncPages = Object.fromEntries(urls.slice(0, -3).map(url => [url, pages[url]]))
+    const localPages = Object.fromEntries(urls.slice(-3).map(url => [`saved:${url}`, pages[url]]))
+    const area = (initial, { full = false } = {}) => {
         const data = structuredClone(initial)
         return {
             QUOTA_BYTES: 102400, MAX_ITEMS: 512,
             get(key, callback) {
                 callback(structuredClone(key == null ? data : (key in data ? { [key]: data[key] } : {})))
             },
-            set(value, callback) { Object.assign(data, structuredClone(value)); callback?.() },
+            set(value, callback) {
+                if (full && Object.keys(value).some(key => key.startsWith('http'))) {
+                    chrome.runtime.lastError = { message: 'QUOTA_BYTES quota exceeded' }
+                    callback?.()
+                    delete chrome.runtime.lastError
+                    return
+                }
+                Object.assign(data, structuredClone(value)); callback?.()
+            },
             remove(keys, callback) { for (const key of [].concat(keys)) delete data[key]; callback?.() },
             getBytesInUse(key, callback) { callback(new TextEncoder().encode(JSON.stringify(data)).length) },
         }
@@ -59,7 +71,8 @@ function mockChrome () {
             sendMessage: message => window.previewActions.push(message),
         },
         storage: {
-            sync: area(pages), local: area({ ...pages, options: { selectedItemIconMode: 'mixed', archiveMode: true } }),
+            sync: area(syncPages, { full: true }),
+            local: area({ ...pages, ...localPages, options: { selectedItemIconMode: 'mixed', archiveMode: true, hybrid: true } }),
             session: area({}), onChanged: { addListener() {} },
         },
         tabs: { create: (tab, callback) => { window.previewActions.push(tab); callback?.({ id: 1 }) } },
