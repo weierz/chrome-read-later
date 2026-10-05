@@ -167,26 +167,32 @@
             <header class="section-heading">
                 <div>
                     <h2 id="import-title">Import</h2>
-                    <p>Import JSON or JSONL. Matching URLs are updated.</p>
+                    <p>Paste or drop a JSON or JSONL export. Items with the same URL are updated.</p>
                 </div>
             </header>
 
             <div class="card card-body">
-            <div class="upload-row">
-                <label for="fileInput" class="button secondary-button">
-                    Choose file
-                    <input type="file" id="fileInput" accept=".json,.jsonl,.ndjson,.txt">
-                </label>
-                <span id="fileName" class="muted-text">No file selected</span>
-            </div>
+                <div id="importDrop" class="drop-zone">
+                    <textarea id="jsonInput" spellcheck="false" aria-label="Reading list to import"
+                        placeholder="Paste JSON or JSONL here, or drop a file."></textarea>
+                </div>
 
-            <label class="field-label" for="jsonInput">JSON or JSONL</label>
-            <textarea id="jsonInput" spellcheck="false" placeholder="[{&quot;title&quot;:&quot;Example&quot;,&quot;url&quot;:&quot;https://example.com/&quot;}]"></textarea>
+                <div class="action-row">
+                    <label for="fileInput" class="button secondary-button">
+                        Choose file…
+                        <input type="file" id="fileInput" accept=".json,.jsonl,.ndjson,.txt">
+                    </label>
+                    <span id="fileName" class="muted-text file-name"></span>
+                    <button id="importButton" type="button" disabled>Import</button>
+                </div>
 
-            <div class="action-row">
-                <button id="importButton" type="button" disabled>Import reading list</button>
-                <span id="importStatus" class="status-text" role="status" aria-live="polite"></span>
-            </div>
+                <div id="importResult" class="import-result" hidden>
+                    <p id="importStatus" role="status" aria-live="polite"></p>
+                    <details id="importSkipped" hidden>
+                        <summary></summary>
+                        <ul></ul>
+                    </details>
+                </div>
             </div>
         </section>
 
@@ -212,7 +218,6 @@
 
             <div class="card card-body">
                 <pre id="json-output" tabindex="0" aria-label="Export preview"></pre>
-                <span id="exportStatus" class="status-text" role="status" aria-live="polite"></span>
             </div>
         </section>
     </main>

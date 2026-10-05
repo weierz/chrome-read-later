@@ -10,6 +10,7 @@ import {
 
 let currentOptions
 let exportItems = []
+let copyResetTimer
 let optionsSaveQueue = Promise.resolve()
 let optionsChangeId = 0
 
@@ -225,25 +226,40 @@ function bindImportControls () {
 
     $textarea.on('input', () => {
         updateImportButton()
-        setStatus($('#importStatus'), '')
+        hideImportResult()
     })
 
-    $('#fileInput').on('change', async event => {
-        const file = event.target.files[0]
-        if (!file) return
+    $('#fileInput').on('change', event => loadImportFile(event.target.files[0]))
 
-        $('#fileName').text(file.name)
-        try {
-            $textarea.val(await file.text())
-            setStatus($('#importStatus'), '')
-        } catch (error) {
-            console.error('Read Later: unable to read import file.', error)
-            setStatus($('#importStatus'), 'Could not read this file.', 'error')
-        }
-        updateImportButton()
+    const $drop = $('#importDrop')
+    $drop.on('dragenter dragover', event => {
+        if (!event.originalEvent.dataTransfer?.types.includes('Files')) return
+        event.preventDefault()
+        $drop.addClass('is-dragging')
+    })
+    $drop.on('dragleave drop', () => $drop.removeClass('is-dragging'))
+    $drop.on('drop', event => {
+        const file = event.originalEvent.dataTransfer?.files[0]
+        if (!file) return
+        event.preventDefault()
+        loadImportFile(file)
     })
 
     $('#importButton').on('click', importReadingList)
+    updateImportButton()
+}
+
+async function loadImportFile (file) {
+    if (!file) return
+
+    hideImportResult()
+    try {
+        $('#jsonInput').val(await file.text())
+        $('#fileName').text(file.name)
+    } catch (error) {
+        console.error('Read Later: unable to read import file.', error)
+        showImportResult('This file could not be read.', 'error')
+    }
     updateImportButton()
 }
 
@@ -251,28 +267,18 @@ async function importReadingList () {
     const content = $('#jsonInput').val().trim()
     if (!content) return
 
-    $('#importButton').prop('disabled', true)
-    setStatus($('#importStatus'), 'Importing…')
+    $('#importButton').prop('disabled', true).text('Importing…')
+    hideImportResult()
 
     try {
         const results = await importItems(content)
-        const syncWarning = results.usedLocalFallback
-            ? ' Chrome Sync filled up, so overflow items were stored locally on this computer.'
-            : ''
+        showImportResults(results)
 
-        if (results.failed === 0 && !results.usedLocalFallback) {
-            setStatus(
-                $('#importStatus'),
-                `Imported ${results.success} items.`,
-                'success'
-            )
-        } else {
-            setStatus(
-                $('#importStatus'),
-                `Imported ${results.success} items; ${results.failed} failed.` +
-                    `${syncWarning} Check the browser console for details.`,
-                'warning'
-            )
+        if (results.success > 0) {
+            // Clear the input so the same list is not imported twice.
+            $('#jsonInput').val('')
+            $('#fileInput').val('')
+            $('#fileName').text('')
         }
 
         await Promise.all([
@@ -281,14 +287,66 @@ async function importReadingList () {
         ])
     } catch (error) {
         console.error('Read Later: import failed.', error)
-        setStatus(
-            $('#importStatus'),
-            'Import failed. Check the browser console for details.',
-            'error'
-        )
+        showImportResult('This is not valid JSON or JSONL.', 'error')
     } finally {
+        $('#importButton').text('Import')
         updateImportButton()
     }
+}
+
+function showImportResults ({ success, skipped, usedLocalFallback }) {
+    const imported = `Imported ${pluralize(success, 'item')}.`
+    const message = success === 0
+        ? `Nothing was imported. ${pluralize(skipped.length, 'entry', 'entries')} skipped.`
+        : skipped.length
+            ? `${imported} ${skipped.length} skipped.`
+            : imported
+    const overflow = usedLocalFallback
+        ? ' Some items are stored on this computer because Chrome Sync is full.'
+        : ''
+    const type = success === 0 ? 'error' : skipped.length || usedLocalFallback ? 'warning' : 'success'
+
+    showImportResult(message + overflow, type)
+
+    if (!skipped.length) return
+    const shown = skipped.slice(0, 20)
+    const $list = $('#importSkipped ul').empty()
+    for (const { location, reason } of shown) {
+        $('<li>').append(
+            $('<span>').text(location),
+            document.createTextNode(` · ${reason}`)
+        ).appendTo($list)
+    }
+    if (skipped.length > shown.length) {
+        $('<li>').text(`…and ${skipped.length - shown.length} more`).appendTo($list)
+    }
+    $('#importSkipped summary').text(`Show skipped ${skipped.length === 1 ? 'entry' : 'entries'}`)
+    $('#importSkipped').prop('hidden', false).prop('open', success === 0)
+}
+
+function showImportResult (message, type) {
+    setStatus($('#importStatus'), message, type)
+    $('#importSkipped').prop('hidden', true)
+    $('#importResult').prop('hidden', false).attr('data-type', type)
+}
+
+function hideImportResult () {
+    $('#importResult').prop('hidden', true)
+    setStatus($('#importStatus'), '')
+}
+
+function pluralize (count, singular, plural = `${singular}s`) {
+    return `${count} ${count === 1 ? singular : plural}`
+}
+
+function describeImportError (error) {
+    if (error instanceof SyntaxError) return 'Not valid JSON'
+    if (error.message.startsWith('Missing required field')) return 'Missing URL or title'
+    if (error.message === 'Unsupported URL scheme') return 'Unsupported kind of URL'
+    if (error instanceof TypeError || error.message.startsWith('Invalid URL')) {
+        return 'Not a complete URL'
+    }
+    return error.message
 }
 
 async function importItems (content) {
@@ -296,6 +354,7 @@ async function importItems (content) {
     const results = {
         success:           0,
         failed:            0,
+        skipped:           [],
         usedLocalFallback: false,
     }
 
@@ -328,6 +387,10 @@ async function importItems (content) {
             results.success++
         } catch (error) {
             results.failed++
+            results.skipped.push({
+                location: entry.location,
+                reason:   describeImportError(error),
+            })
             console.error(
                 `Import error at ${entry.location}:`,
                 error.message,
@@ -357,16 +420,14 @@ async function refreshExport () {
     try {
         const pages = await storage.sortSavedByLatest()
         exportItems = pages.map(simplifyPage)
-        $('#exportSummary').text(
-            `${exportItems.length} ${exportItems.length === 1 ? 'item' : 'items'} ready to export.`
-        )
-        setStatus($('#exportStatus'), '')
+        $('#exportSummary').text(exportItems.length
+            ? `${pluralize(exportItems.length, 'item')} in your reading list.`
+            : 'Your reading list is empty.')
         renderExport()
-        $buttons.prop('disabled', false)
+        $buttons.prop('disabled', exportItems.length === 0)
     } catch (error) {
         console.error('Read Later: unable to prepare export.', error)
         $('#exportSummary').text('The reading list could not be loaded.')
-        setStatus($('#exportStatus'), 'Could not prepare the export.', 'error')
     }
 }
 
@@ -397,12 +458,20 @@ function renderExport () {
 }
 
 async function copyExport () {
+    const $copy = $('#copy')
     try {
         await navigator.clipboard.writeText(getExportOutput())
-        setStatus($('#exportStatus'), 'Copied to clipboard.', 'success')
+        // Confirm on the button itself instead of with a separate message.
+        clearTimeout(copyResetTimer)
+        $copy.text('Copied').addClass('is-done')
+        copyResetTimer = setTimeout(() => $copy.text('Copy').removeClass('is-done'), 1600)
     } catch (error) {
         console.error('Read Later: unable to copy export.', error)
-        setStatus($('#exportStatus'), 'Could not copy to the clipboard.', 'error')
+        const message = 'Could not copy to the clipboard.'
+        setStatus($('#optionsStatus'), message, 'error')
+        setTimeout(() => {
+            if ($('#optionsStatus').text() === message) setStatus($('#optionsStatus'), '')
+        }, 4000)
     }
 }
 
@@ -419,7 +488,6 @@ function downloadExport () {
     link.download = `reading-list-${new Date().toISOString().split('T')[0]}.${format}`
     link.click()
     URL.revokeObjectURL(url)
-    setStatus($('#exportStatus'), `Downloaded ${format.toUpperCase()}.`, 'success')
 }
 
 function getExportOutput () {

@@ -338,7 +338,6 @@ input:disabled {
     margin-top: 6px;
 }
 
-.upload-row,
 .action-row,
 .export-actions {
     display: flex;
@@ -346,19 +345,33 @@ input:disabled {
     gap: 10px;
 }
 
-.upload-row {
-    margin-bottom: 16px;
-}
-
-.upload-row input[type="file"] {
+.action-row input[type="file"] {
     display: none;
 }
 
-.field-label {
-    display: block;
-    margin-bottom: 7px;
+.file-name {
+    min-width: 0;
+    overflow: hidden;
     font-size: 12px;
-    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Import sits at the end of the row, after the chosen file name. */
+#importButton {
+    margin-left: auto;
+}
+
+.drop-zone {
+    position: relative;
+    border-radius: 7px;
+}
+
+.drop-zone.is-dragging #jsonInput {
+    border-color: var(--accent);
+    border-style: dashed;
+    background: var(--accent-soft);
+    box-shadow: var(--focus-ring);
 }
 
 #jsonInput,
@@ -386,13 +399,61 @@ input:disabled {
     margin-bottom: 0;
 }
 
-#exportStatus:not(:empty) {
-    display: block;
-    margin-top: 10px;
+.import-result {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 7px;
+    background: var(--surface-subtle);
+    font-size: 13px;
 }
 
-.action-row {
-    margin-top: 2px;
+.import-result p {
+    margin: 0;
+}
+
+.import-result[data-type="success"] p {
+    color: var(--success);
+}
+
+.import-result[data-type="warning"] p {
+    color: var(--warning);
+}
+
+.import-result[data-type="error"] p {
+    color: var(--error);
+}
+
+.import-result details {
+    margin-top: 6px;
+    color: var(--muted);
+}
+
+.import-result summary {
+    width: fit-content;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.import-result ul {
+    max-height: 180px;
+    margin: 6px 0 0;
+    padding-left: 18px;
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+.import-result li span {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+#copy {
+    min-width: 72px;
+}
+
+#copy.is-done {
+    border-color: var(--success);
+    color: var(--success);
 }
 
 .export-heading {
@@ -407,10 +468,10 @@ input:disabled {
 }
 
 .section-summary {
-    margin-top: 8px;
-    color: var(--accent) !important;
+    margin-top: 6px;
+    color: var(--text) !important;
     font-size: 12px;
-    font-weight: 650;
+    font-weight: 600;
 }
 
 .export-actions {

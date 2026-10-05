@@ -37,11 +37,11 @@ Load the extension unpacked from this checkout (or from the `release.sh` ZIP) in
 
 1. In Options, turn on **Open reading list items in a new tab** and turn off **Store overflow items locally**.
 2. Import [`import-mixed.json`](import-mixed.json).
-   - Expect **8 imported, 11 failed**.
+   - Expect "Imported 8 items. 11 skipped.", with each skipped entry and its reason under "Show skipped entries". The text box clears.
    - Settings are unchanged. The `options` entry tries to switch new-tab opening off, the archive off, and local overflow on; none of that may happen.
    - "Valid URL with surrounding spaces" is saved as `https://example.com/review/padded` with no spaces.
    - The video row shows 35%, and the article row shows 40%.
-3. Delete the `[9.3.0 REVIEW]` items, then import [`import-mixed.jsonl`](import-mixed.jsonl). Expect **8 imported, 12 failed** (the extra failure is a broken JSON line; the blank line is ignored).
+3. Delete the `[9.3.0 REVIEW]` items, then import [`import-mixed.jsonl`](import-mixed.jsonl). Expect "Imported 8 items. 12 skipped." (the extra one is a broken line shown as "Not valid JSON"; the blank line is ignored).
 4. Export, then re-import that export into a clean profile. Nothing should fail.
 
 ### 2. Options saving
