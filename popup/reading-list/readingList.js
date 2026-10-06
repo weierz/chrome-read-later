@@ -11,7 +11,6 @@ export async function setup () {
     await initDomFromStorage()
     loadSiteFavicons()
     setupItemHoverBehavior()
-    observeClippedRows()
     activeFirstLi()
     updateStateOnMouseMove()
     doActionOnMouseClick()
@@ -63,26 +62,6 @@ function setupItemHoverBehavior () {
     })
 }
 
-// Rows partly cut off by the clipped list padding ignore the pointer, so
-// hover, selection, clicks, and tooltips only reach fully visible rows.
-let clippedRowObserver
-
-function observeClippedRows () {
-    clippedRowObserver?.disconnect()
-    const padding = parseFloat(getComputedStyle(readingList[0]).paddingTop)
-    clippedRowObserver = new IntersectionObserver(entries => {
-        for (const { target, intersectionRatio } of entries) {
-            target.classList.toggle('is-clipped', intersectionRatio < 1)
-        }
-    }, {
-        root:       readingList[0],
-        // 1px of slack keeps sub-pixel rows at the padding edge usable.
-        rootMargin: `${1 - padding}px 0px`,
-        threshold:  1,
-    })
-    readingList.children('li').each((_, li) => clippedRowObserver.observe(li))
-}
-
 function activeFirstLi () {
     const li = $('#reading-list li').first()
     const hasReadingItem = li.length !== 0
@@ -110,8 +89,7 @@ function updateStateOnMouseMove () {
 function doActionOnMouseClick () {
     readingList.on('click', event => {
         event.preventDefault()
-        // Clicks on the list padding or a clipped row would otherwise open
-        // the selected item.
+        // Clicks on the list padding would otherwise open the selected item.
         if (!event.target.closest('li')) return
 
         try {
