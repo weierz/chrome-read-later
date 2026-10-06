@@ -4,9 +4,12 @@
     gap: 4px;
     box-sizing: border-box;
     list-style-type: none;
-    /* The list's 6px bottom padding sits above, so match it below. */
-    padding: 0 10px 6px 16px;
-    height: 36px;
+    /* Overlap the list's clipped bottom padding so the icons sit 8px from
+       the last row and 8px from the popup edge. */
+    position: relative;
+    margin-top: -4px;
+    padding: 0 10px 2px 16px;
+    height: 30px;
     background: var(--surface);
     width: 100%;
 }
@@ -15,7 +18,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 30px;
+    height: 28px;
     padding: 0;
     color: var(--muted);
     font-size: 12px;
@@ -75,8 +78,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     border: 0;
     border-radius: 6px;
