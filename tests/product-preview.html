@@ -18,7 +18,8 @@
 <script type="module">
 // Render the actual extension document and scripts with isolated example data.
 // No installed extension storage is read or changed. ?view=archive or options
-// loads those same product documents for visual checks.
+// loads those same product documents for visual checks. ?repeat=N repeats the
+// example pages N times for long-list checks.
 function mockChrome () {
     const examples = [
         ['CSS grid layout · MDN', 'https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_grid_layout', 42],
@@ -34,7 +35,11 @@ function mockChrome () {
         ['JavaScript guide · MDN', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide', 0],
         ['Read Later: documentation and shortcuts', 'https://github.com/willbchang/chrome-read-later#usages', 0],
     ]
-    const pages = Object.fromEntries(examples.map(([title, url, read, video], index) => [url, {
+    const repeat = Math.max(1, Number(new URLSearchParams(parent.location.search).get('repeat')) || 1)
+    const repeated = Array.from({ length: repeat }, (_, round) => examples.map(([title, url, ...rest]) =>
+        round ? [`${title} (${round + 1})`, `${url}${url.includes('#') ? '-' : '#'}copy-${round + 1}`, ...rest] : [title, url, ...rest]
+    )).flat()
+    const pages = Object.fromEntries(repeated.map(([title, url, read, video], index) => [url, {
         title, url, date: Date.UTC(2026, 8, 21) - index * 60000,
         scroll: { top: read ? 400 : 0, percent: `${read}%` },
         video: video ? { percent: `${video}%` } : {},
