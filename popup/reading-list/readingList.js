@@ -11,6 +11,7 @@ export async function setup () {
     await initDomFromStorage()
     loadSiteFavicons()
     setupItemHoverBehavior()
+    observeClippedRows()
     activeFirstLi()
     updateStateOnMouseMove()
     doActionOnMouseClick()
@@ -60,6 +61,26 @@ function setupItemHoverBehavior () {
     readingList.find('a[data-tooltip][data-tooltip-detail]').each((_, anchor) => {
         generator.setupDetailsTooltip(anchor)
     })
+}
+
+// Rows less than half visible past the clipped list padding ignore the
+// pointer, so moving toward the status bar can't select a row whose highlight
+// is hidden. This covers hover, clicks, and tooltips alike.
+let clippedRowObserver
+
+function observeClippedRows () {
+    clippedRowObserver?.disconnect()
+    const padding = parseFloat(getComputedStyle(readingList[0]).paddingTop)
+    clippedRowObserver = new IntersectionObserver(entries => {
+        for (const { target, intersectionRatio } of entries) {
+            target.classList.toggle('is-clipped', intersectionRatio < 0.5)
+        }
+    }, {
+        root:       readingList[0],
+        rootMargin: `-${padding}px 0px`,
+        threshold:  0.5,
+    })
+    readingList.children('li').each((_, li) => clippedRowObserver.observe(li))
 }
 
 function activeFirstLi () {
