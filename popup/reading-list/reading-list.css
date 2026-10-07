@@ -26,10 +26,6 @@
     background: var(--selected);
 }
 
-#reading-list li:focus-within {
-    background: var(--selected);
-}
-
 #reading-list a {
     min-width: 0;
     flex: 1;
@@ -112,8 +108,7 @@
     color: var(--accent);
 }
 
-#reading-list li.active .scroll,
-#reading-list li:focus-within .scroll {
+#reading-list li.active .scroll {
     color: var(--accent-hover);
 }
 
