@@ -48,6 +48,11 @@
     opacity: 0.6;
 }
 
+/* Same color as local-only items in the list; the tooltip has the breakdown. */
+#status-bar #count.has-local #total {
+    color: var(--local);
+}
+
 #status-bar #count[data-format="total"] :is(#row, .count-separator) {
     display: none;
 }

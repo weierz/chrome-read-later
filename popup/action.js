@@ -149,6 +149,7 @@ const updateCount = () => {
     const detail = local
         ? `${synced} synced across devices\n${local} on this device only (sync storage full)`
         : 'All synced across devices'
+    count.toggleClass('has-local', local > 0)
     count.attr({
         'aria-label': `${label}. ${detail.replace('\n', ', ')}`,
         'data-tooltip': label,
