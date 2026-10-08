@@ -120,7 +120,7 @@ describe('9.3.0 review fixtures', () => {
 
     async function importFixture (name) {
         const context = importContext()
-        await vm.runInContext('storage.setOptions({ itemNewTab: true, archiveMode: true, hybrid: false })', context)
+        await vm.runInContext('storage.setOptions({ itemNewTab: true, archiveMode: true })', context)
         context.importContent = fixture(name)
         const result = await vm.runInContext('importItems(importContent)', context)
         const pages = await vm.runInContext('storage.sortSavedByLatest()', context)
@@ -137,7 +137,7 @@ describe('9.3.0 review fixtures', () => {
             expect(pages.map(page => page.url).sort()).toEqual([...expectedUrls].sort())
             expect(options.itemNewTab).toBe(true)
             expect(options.archiveMode).toBe(true)
-            expect(options.hybrid).toBe(false)
+            expect(options.hybrid).toBeUndefined()
         })
     }
 

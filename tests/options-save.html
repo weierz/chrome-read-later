@@ -134,14 +134,6 @@ try {
     w.testState.failWhen = undefined
     check(first.checked === newTab && second.checked === !keep, 'Newest failed save restores the last successful values')
     check(!first.disabled && !second.disabled, 'Controls stay enabled after a queued failure')
-    const hybrid = d.querySelector('#hybrid'), storageStatus = d.querySelector('#storageStatus')
-    const hybridBefore = hybrid.checked
-    hybrid.click()
-    await settled()
-    check(storageStatus.textContent === (hybridBefore ? 'Using Chrome Sync only.' : 'Using Chrome Sync with local overflow.'), 'Storage mode status follows the saved mode')
-    hybrid.click()
-    await waitFor(() => storageStatus.textContent === (hybridBefore ? 'Using Chrome Sync with local overflow.' : 'Using Chrome Sync only.'))
-    check(hybrid.checked === hybridBefore, 'Storage mode can be switched back')
     document.querySelector('#results').textContent = results.join('\n') + '\nAll tests passed.'
 } catch (error) {
     document.querySelector('#results').textContent = results.join('\n') + '\nFAIL: ' + error.stack

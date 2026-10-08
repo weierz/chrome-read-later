@@ -101,13 +101,17 @@ syncArea.QUOTA_BYTES = 102400
 syncArea.MAX_ITEMS = 512
 const localArea = createStorageArea()
 const sessionArea = createStorageArea()
+const storageChangeListeners = []
 
 globalThis.chrome = {
     runtime: {},
     storage: {
-        sync:    syncArea,
-        local:   localArea,
-        session: sessionArea,
+        sync:      syncArea,
+        local:     localArea,
+        session:   sessionArea,
+        onChanged: {
+            addListener: listener => storageChangeListeners.push(listener),
+        },
     },
 }
 
@@ -115,6 +119,7 @@ let storage
 
 beforeAll(async () => {
     storage = await import('./storage.mjs')
+    storage.onSyncChanged(() => {})
 })
 
 beforeEach(async () => {
@@ -126,6 +131,8 @@ beforeEach(async () => {
     await storage.local.clear()
     await storage.localSaved.clear()
     syncArea.resetSetCalls()
+    // A sync change ends any retry delay left by an earlier test.
+    storageChangeListeners.forEach(listener => listener({}, 'sync'))
 })
 
 describe('hybrid reading list storage', () => {
@@ -337,7 +344,7 @@ describe('hybrid reading list storage', () => {
 
     test('saving the font keeps other synced options and saved pages', async () => {
         await storage.sync.set({
-            options: { itemNewTab: true, keepSavedTab: true, fontFamily: 'avenir', isOptions: true },
+            options:                    { itemNewTab: true, keepSavedTab: true, fontFamily: 'avenir', isOptions: true },
             'https://example.com/kept': page('https://example.com/kept', 1),
         })
 
@@ -385,14 +392,12 @@ describe('hybrid reading list storage', () => {
     })
 
     test('retains local options after a failed sync and resumes remote updates after saving', async () => {
-        await storage.setOptions({ hybrid: false, keepSavedTab: false })
+        await storage.setOptions({ keepSavedTab: false })
         syncArea.failNextSet('MAX_WRITE_OPERATIONS_PER_MINUTE exceeded')
 
-        const result = await storage.setOptions({ hybrid: false, keepSavedTab: true })
+        const result = await storage.setOptions({ keepSavedTab: true })
 
         expect(result.syncError).toBeDefined()
-        expect((await storage.getOptions()).keepSavedTab).toBe(true)
-        await storage.useHybridStorage()
         expect((await storage.getOptions()).keepSavedTab).toBe(true)
         expect((await storage.getOptions()).syncPending).toBeUndefined()
 
@@ -401,11 +406,9 @@ describe('hybrid reading list storage', () => {
         expect((await storage.sync.get('options')).options.syncPending).toBeUndefined()
         await storage.sync.set({ options: { keepSavedTab: false, isOptions: true } })
         expect((await storage.getOptions()).keepSavedTab).toBe(false)
-        expect((await storage.getOptions()).hybrid).toBe(true)
     })
 
     test('promotes smaller overflow past an item that exceeds the per-item quota', async () => {
-        await storage.setOptions({ hybrid: true })
         const oversized = { ...page('https://large.example', 1), title: 'x'.repeat(8192) }
         await storage.localSaved.set(oversized)
         await storage.localSaved.set(page('https://small.example', 2))
@@ -419,7 +422,6 @@ describe('hybrid reading list storage', () => {
     })
 
     test('does not defer normal saves after a per-item quota failure', async () => {
-        await storage.setOptions({ hybrid: true })
         await storage.setSavedPage({ ...page('https://large.example', 1), title: 'x'.repeat(8192) })
 
         const result = await storage.setSavedPage(page('https://small.example', 2))
@@ -433,9 +435,6 @@ describe('hybrid reading list storage', () => {
         await storage.local.set(page('https://archive.example', 1))
         await storage.localSaved.set(page('https://local.example', 3))
 
-        const result = await storage.setOptions({ hybrid: true })
-
-        expect(result.error).toBeUndefined()
         expect((await storage.sortSavedByLatest()).map(item => item.url)).toEqual([
             'https://local.example',
             'https://synced.example',
@@ -448,7 +447,6 @@ describe('hybrid reading list storage', () => {
     test('deduplicates pages that exist in both active stores', async () => {
         await storage.sync.set(page('https://same.example', 1))
         await storage.localSaved.set(page('https://same.example', 2))
-        await storage.setOptions({ hybrid: true })
 
         const pages = await storage.sortSavedByLatest()
 
@@ -463,7 +461,6 @@ describe('hybrid reading list storage', () => {
         const result = await storage.setSavedPage(page('https://new.example', 2))
 
         expect(result.error?.message).toContain('quota exceeded')
-        expect((await storage.getOptions()).hybrid).toBe(true)
         expect((await storage.localSaved.sortByLatest()).map(item => item.url)).toEqual([
             'https://new.example',
         ])
@@ -476,7 +473,6 @@ describe('hybrid reading list storage', () => {
     test('continues trying sync and removes a local duplicate on success', async () => {
         const savedPage = page('https://local.example', 1)
         await storage.localSaved.set(savedPage)
-        await storage.setOptions({ hybrid: true })
 
         const result = await storage.setSavedPage(page(savedPage.url, 2))
 
@@ -537,32 +533,7 @@ describe('hybrid reading list storage', () => {
         expect(await storage.local.sortByLatest()).toHaveLength(1)
     })
 
-    test('keeps hybrid mode enabled when overflow does not fit in sync', async () => {
-        await storage.setOptions({ hybrid: true })
-        await storage.localSaved.set(page('https://local.example', 1))
-        syncArea.failNextSet()
-
-        const result = await storage.setOptions({ hybrid: false })
-
-        expect(result.error?.message).toContain('quota exceeded')
-        expect(result.options.hybrid).toBe(true)
-        expect((await storage.getOptions()).hybrid).toBe(true)
-    })
-
-    test('moves overflow to sync when hybrid mode is disabled', async () => {
-        await storage.setOptions({ hybrid: true })
-        await storage.localSaved.set(page('https://local.example', 1))
-
-        const result = await storage.setOptions({ hybrid: false })
-
-        expect(result.error).toBeUndefined()
-        expect(result.options.hybrid).toBe(false)
-        expect(await storage.sync.sortByLatest()).toHaveLength(1)
-        expect(await storage.localSaved.sortByLatest()).toHaveLength(0)
-    })
-
     test('promotes local overflow after sync space is freed', async () => {
-        await storage.setOptions({ hybrid: true })
         await storage.localSaved.set(page('https://local.example', 1))
 
         await storage.rebalanceHybridStorage()
@@ -572,7 +543,6 @@ describe('hybrid reading list storage', () => {
     })
 
     test('promotes existing overflow before saving a new page', async () => {
-        await storage.setOptions({ hybrid: true })
         await storage.localSaved.set(page('https://local.example', 1))
 
         await storage.setSavedPage(page('https://new.example', 2))
@@ -585,7 +555,6 @@ describe('hybrid reading list storage', () => {
     })
 
     test('stops promotion after the first total-quota failure', async () => {
-        await storage.setOptions({ hybrid: true })
         await storage.localSaved.set(page('https://local-one.example', 1))
         await storage.localSaved.set(page('https://local-two.example', 2))
         syncArea.fillQuota()
@@ -598,7 +567,6 @@ describe('hybrid reading list storage', () => {
     })
 
     test('defers later sync writes after a quota failure', async () => {
-        await storage.setOptions({ hybrid: true })
         syncArea.fillQuota()
         syncArea.resetSetCalls()
 
@@ -612,14 +580,19 @@ describe('hybrid reading list storage', () => {
         expect(await storage.localSaved.sortByLatest()).toHaveLength(2)
     })
 
-    test('migrates the previous local-only option to hybrid mode', async () => {
+    test('drops the retired storage mode options', async () => {
         await storage.local.set({
-            options: { localOnly: true, isOptions: true },
+            options: { hybrid: false, localOnly: true, isOptions: true },
         })
 
         const options = await storage.getOptions()
+        const { options: savedOptions } = await storage.local.get('options')
+        await storage.setOptions({ hybrid: false })
+        const { options: resavedOptions } = await storage.local.get('options')
 
-        expect(options.hybrid).toBe(true)
+        expect(options.hybrid).toBeUndefined()
         expect(options.localOnly).toBeUndefined()
+        expect(savedOptions.hybrid).toBe(false)
+        expect(resavedOptions.hybrid).toBeUndefined()
     })
 })

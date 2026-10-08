@@ -159,19 +159,12 @@
             <header class="section-heading">
                 <div>
                     <h2 id="storage-title">Storage</h2>
-                    <p>Use Chrome Sync first, then local storage when it is full.</p>
+                    <p>Items sync with Chrome. When Chrome Sync is full, they stay on this computer and sync once space frees up.</p>
                 </div>
             </header>
 
-            <div class="option-list">
-                <label class="option-row" for="hybrid">
-                    <input class="option-control" id="hybrid" name="hybrid" type="checkbox" role="switch">
-                    <span>
-                        <strong>Store overflow items locally</strong>
-                        <small>New items stay on this computer when Chrome Sync is full.</small>
-                        <small id="storageStatus" class="status-text inline-status" role="status" aria-live="polite"></small>
-                    </span>
-                </label>
+            <div class="card card-body">
+                <p id="storageStatus" class="status-text" role="status" aria-live="polite"></p>
             </div>
         </section>
 

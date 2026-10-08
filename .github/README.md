@@ -39,9 +39,9 @@ Please rate it on [chrome web store](https://chrome.google.com/webstore/detail/f
 - **Local Archive**: Keep an archive of reading list items locally.
 
 ### Hybrid Storage
-- When Chrome Sync fills up, local overflow turns on automatically so new items can still be saved on this computer.
-- Synced and local items appear together; local overflow items use a different text color and are included in exports.
-- Overflow items automatically retry syncing when space becomes available. Turn off **Store overflow items locally** in Options only when all overflow items fit in sync.
+- When Chrome Sync is full, new items are saved on this computer instead.
+- Synced and local items appear together; local items use a different text color, the status bar total turns the same color, and its tooltip shows the breakdown. Local items are included in exports.
+- Local items move to Chrome Sync automatically when space becomes available. **Options › Storage** shows how many items are synced and how many are on this computer only.
 
 ### Appearance
 - **Light and Dark Themes**: The popup, Archive, and Options follow your system appearance with one shared palette.
@@ -117,7 +117,7 @@ Find **Read Later** and set the shortcuts(resolve the keyboard shortcuts conflic
 - Get/Set reading progress works on most pages, it may change based on current window size.
 - Only get/set the first HTML video's information.
 - Removing the extension will delete the reading list in the cloud, **it cannot be restored**.
-- Chrome Sync capacity depends on item size; items that exceed its limits remain local while hybrid storage is enabled.
+- Chrome Sync capacity depends on item size; items that exceed its limits remain on this computer.
 - At most 10,000 reading list items are kept in the archive.
 - Site icons are requested from Google's favicon service using only the site's origin (for example `https://example.com`).
 

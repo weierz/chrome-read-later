@@ -71,7 +71,7 @@ async function loadOptions () {
     try {
         currentOptions = await storage.getOptions()
         applyOptions(currentOptions)
-        await updateStorageControl(currentOptions)
+        await updateStorageStatus()
     } catch (error) {
         console.error('Read Later: unable to load options.', error)
         setStatus($('#optionsStatus'), 'Could not load options.', 'error')
@@ -95,20 +95,8 @@ async function persistOptions (nextOptions, changeId) {
         currentOptions = result.options
         if (changeId !== optionsChangeId) return
         applyOptions(currentOptions)
-        await updateStorageControl(
-            currentOptions,
-            !!result.modeError && currentOptions.hybrid,
-            changeId
-        )
-        if (changeId !== optionsChangeId) return
 
-        if (result.modeError) {
-            setStatus(
-                $('#optionsStatus'),
-                'Other changes were saved, but the storage mode could not be changed.',
-                'error'
-            )
-        } else if (result.syncError) {
+        if (result.syncError) {
             setStatus(
                 $('#optionsStatus'),
                 'Saved on this computer, but Chrome could not sync these options.',
@@ -123,9 +111,7 @@ async function persistOptions (nextOptions, changeId) {
         if (previousOptions) {
             currentOptions = previousOptions
             applyOptions(previousOptions)
-            await updateStorageControl(previousOptions, false, changeId)
         }
-        if (changeId !== optionsChangeId) return
         setStatus($('#optionsStatus'), 'Could not save these options.', 'error')
     } finally {
         if (changeId === optionsChangeId) enableAvailableOptionControls()
@@ -134,7 +120,7 @@ async function persistOptions (nextOptions, changeId) {
 
 function readOptions () {
     return {
-        fontFamily:          $('#fontFamily').val(),
+        fontFamily:           $('#fontFamily').val(),
         itemNewTab:           $('#itemNewTab').prop('checked'),
         keepSavedTab:         $('#keepSavedTab').prop('checked'),
         itemHoverMode:        $('#itemHoverMode').val(),
@@ -142,7 +128,6 @@ function readOptions () {
         countFormat:          $('#countFormat').val(),
         archiveMode:          $('#archiveMode').prop('checked'),
         archiveRetentionDays: Number($('#archiveRetentionDays').val()),
-        hybrid:               $('#hybrid').prop('checked'),
         isOptions:            true,
     }
 }
@@ -171,52 +156,39 @@ function applyOptions (options) {
     $('#countFormat').val(options?.countFormat ?? 'slash')
     $('#archiveMode').prop('checked', options?.archiveMode)
     $('#archiveRetentionDays').val(String(options?.archiveRetentionDays ?? 0))
-    $('#hybrid').prop('checked', options?.hybrid)
     updateOptionHints()
 }
 
-async function updateStorageControl (options, syncUnavailable = false, changeId) {
-    const $hybrid = $('#hybrid')
+async function updateStorageStatus () {
     const $storageStatus = $('#storageStatus')
-
-    if (options.hybrid && !syncUnavailable) {
-        try {
-            syncUnavailable = await storage.isSyncFull()
-        } catch (error) {
-            console.warn('Read Later: unable to check Chrome sync storage.', error)
+    try {
+        const [pages, localUrls, syncFull] = await Promise.all([
+            storage.sortSavedByLatest(),
+            storage.getLocalOverflowUrls(),
+            storage.isSyncFull(),
+        ])
+        const local = localUrls.length
+        if (local) {
+            setStatus(
+                $storageStatus,
+                `${pages.length - local} synced, ${local} on this computer only.`,
+                'warning'
+            )
+        } else if (syncFull) {
+            setStatus($storageStatus, 'Chrome Sync is full.', 'warning')
+        } else if (pages.length) {
+            setStatus($storageStatus, `${pluralize(pages.length, 'item')}, all synced.`)
+        } else {
+            setStatus($storageStatus, 'No saved items.')
         }
+    } catch (error) {
+        console.warn('Read Later: unable to check Chrome sync storage.', error)
+        setStatus($storageStatus, '')
     }
-
-    if (changeId !== undefined && changeId !== optionsChangeId) return
-
-    $hybrid
-        .prop('checked', options.hybrid)
-        .data('syncUnavailable', syncUnavailable)
-
-    if (syncUnavailable) {
-        setStatus(
-            $storageStatus,
-            'Chrome Sync is full. New items will be stored locally.',
-            'warning'
-        )
-    } else {
-        setStatus(
-            $storageStatus,
-            options.hybrid
-                ? 'Using Chrome Sync with local overflow.'
-                : 'Using Chrome Sync only.'
-        )
-    }
-
-    enableAvailableOptionControls()
 }
 
 function enableAvailableOptionControls () {
     $('.option-control').prop('disabled', false)
-    $('#hybrid').prop(
-        'disabled',
-        $('#hybrid').data('syncUnavailable') === true
-    )
     $('#archiveRetentionDays').prop(
         'disabled',
         !$('#archiveMode').prop('checked')
@@ -309,6 +281,7 @@ function showImportResults ({ success, skipped, usedLocalFallback }) {
     const type = success === 0 ? 'error' : skipped.length || usedLocalFallback ? 'warning' : 'success'
 
     showImportResult(message + overflow, type)
+    updateStorageStatus()
 
     if (!skipped.length) return
     const shown = skipped.slice(0, 20)

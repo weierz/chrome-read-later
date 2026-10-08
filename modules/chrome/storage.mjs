@@ -236,8 +236,8 @@ export async function getOptions () {
         archiveRetentionDays: localOptions?.archiveRetentionDays
             ?? syncOptions?.archiveRetentionDays
             ?? legacyHistoryRetentionDays ?? 0,
-        hybrid:      localOptions?.hybrid ?? localOptions?.localOnly ?? false,
     }
+    delete options.hybrid
     delete options.localOnly
     delete options.itemPopover
     delete options.historyMode
@@ -254,18 +254,9 @@ export async function setOptions (options) {
         0,
         Number(nextOptions.archiveRetentionDays) || 0
     )
-    let modeError
-
-    if (nextOptions.hybrid !== previousOptions.hybrid) {
-        try {
-            if (!nextOptions.hybrid) await copyLocalSavedPagesToSync()
-        } catch (error) {
-            nextOptions.hybrid = previousOptions.hybrid
-            modeError = error
-        }
-    }
 
     const savedOptions = { ...nextOptions, isOptions: true }
+    delete savedOptions.hybrid
     delete savedOptions.localOnly
     delete savedOptions.itemPopover
     delete savedOptions.historyMode
@@ -274,7 +265,6 @@ export async function setOptions (options) {
     await local.set({ options: { ...savedOptions, syncPending: true } })
 
     const syncOptions = { ...savedOptions }
-    delete syncOptions.hybrid
     delete syncOptions.itemHoverMode
     delete syncOptions.selectedItemIconMode
     delete syncOptions.countFormat
@@ -299,17 +289,13 @@ export async function setOptions (options) {
     }
 
     return {
-        options:   savedOptions,
-        modeError,
+        options: savedOptions,
         syncError,
-        error:     modeError || syncError,
+        error:   syncError,
     }
 }
 
 export async function sortSavedByLatest () {
-    const options = await getOptions()
-    if (!options.hybrid) return sync.sortByLatest()
-
     const [syncPages, overflowPages] = await Promise.all([
         sync.sortByLatest(),
         localSaved.sortByLatest(),
@@ -320,11 +306,8 @@ export async function sortSavedByLatest () {
 }
 
 export async function getSavedPosition (url) {
-    const options = await getOptions()
-    if (options.hybrid) {
-        const overflowPage = await localSaved.get(url)
-        if (overflowPage[url]) return localSaved.getPosition(url)
-    }
+    const overflowPage = await localSaved.get(url)
+    if (overflowPage[url]) return localSaved.getPosition(url)
     return sync.getPosition(url)
 }
 
@@ -334,19 +317,17 @@ export async function setSavedPage (page) {
         await setArchivePage(page, options.archiveRetentionDays)
     }
 
-    if (options.hybrid && !canRetrySync()) {
+    if (!canRetrySync()) {
         await localSaved.set(page)
-        return { syncSaved: false, hybrid: true, deferred: true }
+        return { syncSaved: false, deferred: true }
     }
 
     try {
         await sync.set(page)
         syncRetryAfter = 0
-        if (options.hybrid) {
-            await localSaved.remove(page.url)
-            await rebalanceHybridStorage()
-        }
-        return { syncSaved: true, hybrid: options.hybrid }
+        await localSaved.remove(page.url)
+        await rebalanceHybridStorage()
+        return { syncSaved: true }
     } catch (error) {
         deferSyncRetry(error)
         await localSaved.set(page)
@@ -358,11 +339,10 @@ export async function setSavedPage (page) {
                 removeError
             )
         }
-        if (!options.hybrid) await useHybridStorage()
         if (!isSyncLimitError(error)) {
             console.warn('Read Later: page saved as local overflow.', error)
         }
-        return { syncSaved: false, hybrid: true, error }
+        return { syncSaved: false, error }
     }
 }
 
@@ -391,19 +371,6 @@ export async function cleanupArchive ({
         .map(page => page.url)
     if (oldestUrls.length) await local.remove(oldestUrls)
     return oldestUrls.length
-}
-
-export async function useHybridStorage () {
-    const options = await getOptions()
-    const { options: localOptions } = await local.get('options')
-    await local.set({
-        options: {
-            ...localOptions,
-            ...options,
-            hybrid:    true,
-            isOptions: true,
-        },
-    })
 }
 
 export async function isSyncNearQuota () {
@@ -484,8 +451,7 @@ export async function rebalanceHybridStorage () {
 }
 
 async function promoteLocalOverflow () {
-    const options = await getOptions()
-    if (!options.hybrid || !canRetrySync()) return
+    if (!canRetrySync()) return
 
     const pages = (await localSaved.sortByLatest()).reverse()
     for (const page of pages) {
@@ -512,14 +478,4 @@ export function onSyncChanged (callback) {
             callback(changes)
         }
     })
-}
-
-async function copyLocalSavedPagesToSync () {
-    const pages = await localSaved.sortByLatest()
-    if (pages.length) {
-        await sync.set(Object.fromEntries(
-            pages.map(page => [page.url, page])
-        ))
-        await localSaved.clear()
-    }
 }

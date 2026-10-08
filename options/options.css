@@ -336,10 +336,6 @@ input:disabled {
     color: var(--error);
 }
 
-.inline-status {
-    margin-top: 6px;
-}
-
 .action-row,
 .export-actions {
     display: flex;

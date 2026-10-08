@@ -14,13 +14,11 @@ $(async () => {
     applyFontPreference(options)
     let localOverflowUrls = []
 
-    if (options.hybrid) {
-        try {
-            await storage.rebalanceHybridStorage()
-            localOverflowUrls = await storage.getLocalOverflowUrls()
-        } catch (error) {
-            console.warn('Read Later: unable to identify local overflow items.', error)
-        }
+    try {
+        await storage.rebalanceHybridStorage()
+        localOverflowUrls = await storage.getLocalOverflowUrls()
+    } catch (error) {
+        console.warn('Read Later: unable to identify local overflow items.', error)
     }
 
     await storage.session.initSessionKeys()

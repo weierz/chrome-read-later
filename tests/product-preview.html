@@ -77,7 +77,7 @@ function mockChrome () {
         },
         storage: {
             sync: area(syncPages, { full: true }),
-            local: area({ ...pages, ...localPages, options: { selectedItemIconMode: 'mixed', archiveMode: true, hybrid: true } }),
+            local: area({ ...pages, ...localPages, options: { selectedItemIconMode: 'mixed', archiveMode: true } }),
             session: area({}), onChanged: { addListener() {} },
         },
         tabs: { create: (tab, callback) => { window.previewActions.push(tab); callback?.({ id: 1 }) } },
