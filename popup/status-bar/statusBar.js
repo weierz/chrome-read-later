@@ -23,7 +23,7 @@ function init () {
 
     $('#status-bar').append(`
      <li id="count" aria-label="Reading list count">
-        <span id="row">0</span><span class="count-separator" aria-hidden="true"> / </span><span id="total">0</span><span class="local-dot" aria-hidden="true" hidden></span>
+        <span id="row">0</span><span class="count-separator" aria-hidden="true"> / </span><span id="total">0</span>
      </li>
      ${archive}
      <li><button type="button" id="options" data-tooltip="Options (,)"

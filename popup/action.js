@@ -143,12 +143,17 @@ const updateCount = () => {
     count.attr('data-format', separator ? 'position' : 'total')
     count.find('.count-separator').text(separator ?? '')
 
-    const current = separator ? `${row}${separator}${total}` : `${total}`
     const local = items.filter('.local-overflow').length
     const synced = total - local
-    count.find('.local-dot').prop('hidden', !local)
-    const text = `${current} (${synced} synced + ${local} local)`
-    count.attr({ 'aria-label': text, 'data-tooltip': text })
+    const label = separator ? `Item ${row} of ${total}` : `${total} items`
+    const detail = local
+        ? `${synced} synced across devices\n${local} on this device only (sync storage full)`
+        : 'All synced across devices'
+    count.attr({
+        'aria-label': `${label}. ${detail.replace('\n', ', ')}`,
+        'data-tooltip': label,
+        'data-tooltip-detail': detail
+    })
 }
 
 const moveToPreviousOrNext = li => {
