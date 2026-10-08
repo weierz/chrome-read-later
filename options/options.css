@@ -200,7 +200,7 @@ h2 {
 .card {
     overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 10px;
     background: var(--surface);
 }
 
@@ -232,10 +232,10 @@ h2 {
     position: relative;
     flex: 0 0 auto;
     order: 2;
-    width: 36px;
-    height: 20px;
+    width: 32px;
+    height: 18px;
     margin: 0;
-    border-radius: 10px;
+    border-radius: 9px;
     background: var(--border-strong);
     cursor: pointer;
     appearance: none;
@@ -246,8 +246,8 @@ h2 {
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: var(--surface);
     box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
@@ -260,7 +260,7 @@ h2 {
 }
 
 .option-row input[role="switch"]:checked::before {
-    transform: translateX(16px);
+    transform: translateX(14px);
 }
 
 .option-row > span,
@@ -272,7 +272,7 @@ h2 {
 .option-row strong,
 .select-row strong {
     display: block;
-    font-weight: 650;
+    font-weight: 400;
 }
 
 small {
@@ -289,7 +289,9 @@ small {
 
 .select-row select {
     flex: 0 0 auto;
-    width: 220px;
+    max-width: 280px;
+    /* Size to the chosen option, not the longest one. */
+    field-sizing: content;
 }
 
 select:disabled,
@@ -557,6 +559,7 @@ input:disabled {
 
     .select-row select {
         width: 100%;
+        max-width: none;
     }
 
 }
