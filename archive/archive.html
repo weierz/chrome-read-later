@@ -9,50 +9,52 @@
     <script type="module" src="archive.js"></script>
 </head>
 <body>
-<header class="app-header">
-    <a class="brand" href="archive.html" aria-label="Read Later archive">
+<header class="topbar">
+    <a class="brand" href="archive.html">
         <img src="../icons/logo-orange48x48.png" alt="">
-        <span>Read Later</span>
+        <span>Archive</span>
+        <span id="archiveCount" class="brand-count" aria-live="polite"></span>
     </a>
-    <a class="settings-link" href="../options/options.html#archive">Archive settings</a>
+
+    <label class="search" for="archiveSearch">
+        <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="7" cy="7" r="4.75"/>
+            <path d="m10.5 10.5 3.25 3.25"/>
+        </svg>
+        <span class="visually-hidden">Search archive</span>
+        <input id="archiveSearch" type="search" autocomplete="off" spellcheck="false"
+               placeholder="Search" title="Search titles and URLs">
+        <kbd class="search-key" aria-hidden="true">/</kbd>
+    </label>
+
+    <a class="settings-link" href="../options/options.html#archive"
+       title="Archive settings" aria-label="Archive settings">
+        <img src="../icons/options.svg" alt="">
+    </a>
 </header>
 
-<main>
-    <header class="archive-header">
-        <div>
-            <p class="eyebrow">Stored on this computer</p>
-            <h1>Archive</h1>
-            <p class="lede">Previously saved reading list items.</p>
-        </div>
-        <p id="archiveCount" class="archive-count" aria-live="polite">Loading…</p>
-    </header>
+<div class="layout">
+    <nav class="sites" aria-label="Sites">
+        <ul id="siteList" class="site-list"></ul>
+    </nav>
 
-    <section class="archive-workspace" aria-labelledby="archive-list-title">
-        <h2 id="archive-list-title" class="visually-hidden">Archived items</h2>
-        <div class="toolbar">
-            <label class="search-field" for="archiveSearch">
-                <span class="visually-hidden">Search archive</span>
-                <input id="archiveSearch" type="search" autocomplete="off"
-                       placeholder="Search titles and URLs">
-            </label>
-            <span id="resultSummary" class="result-summary"></span>
-        </div>
-
+    <main class="timeline" aria-labelledby="archive-list-title">
+        <h1 id="archive-list-title" class="visually-hidden">Archive</h1>
         <p id="pageStatus" class="page-status" role="status" aria-live="polite"></p>
-        <ol id="archiveList" class="archive-list"></ol>
+        <div id="archiveGroups"></div>
+        <div id="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
 
         <div id="emptyState" class="empty-state" hidden>
             <img src="../icons/archive.svg" alt="">
             <h2 id="emptyTitle">Archive is empty</h2>
             <p id="emptyMessage">Items you save will appear here.</p>
+            <button id="clearFilters" class="clear-filters" type="button" hidden>Clear search</button>
         </div>
-
-        <button id="loadMore" class="load-more" type="button" hidden>Show more</button>
-    </section>
-</main>
+    </main>
+</div>
 
 <div id="undoToast" class="undo-toast" role="status" aria-live="polite" hidden>
-    <span>Removed from Archive.</span>
+    <span>Removed</span>
     <button id="undoRemove" type="button">Undo</button>
 </div>
 </body>

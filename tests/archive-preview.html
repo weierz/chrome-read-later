@@ -1,0 +1,64 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archive preview</title>
+<style>html, body, iframe { width: 100%; height: 100%; margin: 0; border: 0; display: block; }</style>
+<iframe title="Archive preview"></iframe>
+<script type="module">
+// Serve from the repository root. Renders the real archive page with mocked
+// Chrome storage filled with sample items; no installed extension data is used.
+function mockChrome (pages) {
+    const area = data => ({
+        get (key, callback) {
+            callback(structuredClone(key == null ? data :
+                (key in data ? { [key]: data[key] } : {})))
+        },
+        set (value, callback) { Object.assign(data, structuredClone(value)); callback() },
+        remove (keys, callback) {
+            for (const key of [].concat(keys)) delete data[key]
+            callback()
+        },
+        getBytesInUse (key, callback) { callback(0) },
+    })
+    window.chrome = {
+        runtime: { sendMessage: message => console.log('sendMessage', message) },
+        storage: {
+            local:   area(Object.fromEntries(pages.map(page => [page.url, page]))),
+            sync:    area({}),
+            session: area({}),
+        },
+    }
+}
+
+const sites = [
+    ['github.com', ['Release notes for 9.3', 'Pull request: rework sync quota', 'Discussions · roadmap']],
+    ['www.youtube.com', ['Designing calm interfaces (talk)', 'How CSS anchor positioning works']],
+    ['developer.chrome.com', ['chrome.storage API reference', 'Manifest V3 migration checklist']],
+    ['en.wikipedia.org', ['Speed reading', 'Zeigarnik effect', 'Information foraging']],
+    ['news.ycombinator.com', ['Show HN: A tiny read-later extension', 'Ask HN: How do you keep a reading list?']],
+    ['www.nytimes.com', ['The case for reading slowly']],
+    ['blog.example.org', ['A very long article title that keeps going to check how the row truncates when there is not enough room for it']],
+]
+const now = Date.now()
+const hour = 60 * 60 * 1000
+const pages = []
+let index = 0
+for (let step = 0; step < 140; step++) {
+    const [host, titles] = sites[step % sites.length]
+    const title = titles[step % titles.length]
+    const date = now - (step < 12 ? step * 3 * hour : step * step * 0.9 * hour)
+    pages.push({
+        url:    `https://${host}/item-${index++}`,
+        title,
+        date,
+        scroll: step % 4 === 1 ? { top: 400, percent: `${20 + step % 70}%` } : { top: 0 },
+        video:  host.includes('youtube') && step % 3 ? { percent: `${10 + step % 80}%` } : {},
+    })
+}
+
+const frame = document.querySelector('iframe')
+const html = await (await fetch('../archive/archive.html')).text()
+const base = new URL('../archive/', location.href).href
+frame.srcdoc = html.replace('<head>',
+    `<head><base href="${base}"><script>(${mockChrome})(${JSON.stringify(pages)});<\/script>`)
+</script>
