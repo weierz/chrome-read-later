@@ -9,14 +9,17 @@ import {
 } from '../modules/favicon.mjs'
 import { shouldShowDeleteIcon } from '../popup/selectionIcon.mjs'
 import {
+    countSites,
     filterArchivePages,
     getArchiveKeyBinding,
     getArchiveProgress,
     getDisplayUrl,
+    groupArchivePages,
     splitMatches,
 } from './archiveView.mjs'
 
 const PAGE_SIZE = 100
+const SITE_LIMIT = 30
 const UNDO_DURATION = 6000
 const TITLE_TOOLTIP_DELAY = 800
 const DELETE_ICON = '../icons/delete-black.svg'
@@ -36,12 +39,12 @@ let lastKey = 'none'
 let lastPointer
 let removedPages = []
 let undoTimer
-let settingsSaveQueue = Promise.resolve()
-let settingsChangeId = 0
+let selectedSite = ''
+let showAllSites = false
 
 const $ = selector => document.querySelector(selector)
-const list = () => $('#archiveList')
-const items = () => [...list().children]
+const list = () => $('#archiveGroups')
+const items = () => [...list().querySelectorAll('.archive-item')]
 const activeItem = () => list().querySelector('.archive-item.active')
 const getQuery = () => $('#archiveSearch').value
 
@@ -58,7 +61,6 @@ async function init () {
         ])
         options = storedOptions || {}
         applyFontPreference(options)
-        applySettings()
         archivePages = pages.filter(page => page.url)
         applyFilter()
     } catch (error) {
@@ -75,8 +77,8 @@ function bindEvents () {
     list().addEventListener('mousemove', handleMouseMove)
     list().addEventListener('click', handleListClick)
     list().addEventListener('auxclick', handleListClick)
-    document.querySelectorAll('.option-control').forEach(control =>
-        control.addEventListener('change', saveSettings))
+    $('#siteList').addEventListener('click', handleSiteClick)
+    $('#question').addEventListener('click', openHelp)
     $('#undoRemove').addEventListener('click', undoRemove)
     document.addEventListener('keydown', handleKey)
 
@@ -111,6 +113,13 @@ function handleSearchKey (event) {
 
 function handleKey (event) {
     if (event.target.closest?.('input, textarea, select, button, a:not(.item-title)')) {
+        return
+    }
+
+    if (event.key === 'Escape' && (getQuery() || selectedSite)) {
+        $('#archiveSearch').value = ''
+        selectedSite = ''
+        applyFilter()
         return
     }
 
@@ -169,59 +178,54 @@ function handleListClick (event) {
     }
 }
 
-function applySettings () {
-    $('#archiveMode').checked = options.archiveMode
-    $('#archiveRetentionDays').value = String(options.archiveRetentionDays ?? 0)
-    $('#archiveRetentionDays').disabled = !options.archiveMode
-}
-
-function saveSettings () {
-    const changes = {
-        archiveMode:          $('#archiveMode').checked,
-        archiveRetentionDays: Number($('#archiveRetentionDays').value),
+function handleSiteClick (event) {
+    if (event.target.closest('.more-sites')) {
+        showAllSites = true
+        renderSites()
+        return
     }
-    const changeId = ++settingsChangeId
-    $('#archiveRetentionDays').disabled = !changes.archiveMode
-    setPageStatus('')
-    // Serialize writes so an older result never replaces a newer choice.
-    settingsSaveQueue = settingsSaveQueue.then(() =>
-        persistSettings(changes, changeId))
-}
-
-async function persistSettings (changes, changeId) {
-    try {
-        const result = await storage.setOptions(changes)
-        if (changeId !== settingsChangeId) return
-        options = result.options
-        applySettings()
-        // A shorter retention period may have removed old items.
-        const pages = await storage.local.sortByLatest()
-        archivePages = pages.filter(page => page.url)
-        const query = getQuery()
-        filteredPages = filterArchivePages(archivePages, query)
-        render()
-    } catch (error) {
-        console.error('Read Later: unable to save archive settings.', error)
-        if (changeId !== settingsChangeId) return
-        applySettings()
-        setPageStatus('Could not save these options.', 'error')
-    }
+    const link = event.target.closest('.sidebar-link')
+    if (!link) return
+    event.preventDefault()
+    selectedSite = link.dataset.site
+    applyFilter()
 }
 
 function applyFilter () {
     visibleCount = PAGE_SIZE
-    filteredPages = filterArchivePages(archivePages, getQuery())
+    filteredPages = filterArchivePages(archivePages, getQuery(), selectedSite)
     activeUrl = filteredPages[0]?.url
     render()
     window.scrollTo({ top: 0 })
 }
 
+function refilter () {
+    filteredPages = filterArchivePages(archivePages, getQuery(), selectedSite)
+}
+
 function render () {
     const query = getQuery()
     const fragment = document.createDocumentFragment()
-    filteredPages.slice(0, visibleCount)
-        .forEach(page => fragment.append(createItem(page, query)))
+    for (const group of groupArchivePages(filteredPages.slice(0, visibleCount))) {
+        const section = document.createElement('section')
+        section.className = 'archive-group'
+        section.setAttribute('aria-label', group.label)
+
+        const heading = document.createElement('header')
+        heading.className = 'section-heading'
+        const title = document.createElement('h2')
+        title.textContent = group.label
+        heading.append(title)
+
+        const card = document.createElement('ul')
+        card.className = 'option-list archive-list'
+        group.pages.forEach(page => card.append(createItem(page, query)))
+
+        section.append(heading, card)
+        fragment.append(section)
+    }
     list().replaceChildren(fragment)
+    renderSites()
 
     const item = items().find(li => li.dataset.url === activeUrl) || items()[0]
     if (item) selectItem(item, lastInputType, { scroll: false })
@@ -369,7 +373,7 @@ function focusSearch () {
 }
 
 function openOptions () {
-    location.href = '../options/options.html'
+    location.href = '../options/options.html#archive'
 }
 
 function openHelp () {
@@ -391,7 +395,7 @@ async function removeItem (item) {
         await item.animate([{ opacity: 1 }, { opacity: 0 }],
             { duration: 150, easing: 'ease-out' }).finished
         archivePages = archivePages.filter(({ url }) => url !== page.url)
-        filteredPages = filteredPages.filter(({ url }) => url !== page.url)
+        refilter()
         removedPages.push(page)
         activeUrl = neighbor?.dataset.url
         render()
@@ -410,7 +414,7 @@ async function undoRemove () {
     try {
         await storage.local.set(page)
         archivePages = [...archivePages, page].sort((a, b) => b.date - a.date)
-        filteredPages = filterArchivePages(archivePages, getQuery())
+        refilter()
         const index = filteredPages.indexOf(page)
         if (index >= visibleCount) visibleCount = index + 1
         activeUrl = page.url
@@ -464,12 +468,80 @@ function updateEmptyState (query) {
     $('#emptyState').hidden = !isEmpty
     if (!isEmpty) return
 
-    $('#emptyTitle').textContent = query.trim()
+    const isFiltered = Boolean(query.trim() || selectedSite)
+    $('#emptyTitle').textContent = isFiltered
         ? 'No matching items'
         : 'Archive is empty'
-    $('#emptyMessage').textContent = query.trim()
-        ? 'Try another title or URL.'
+    $('#emptyMessage').textContent = isFiltered
+        ? 'Try another title, URL, or site.'
         : 'Items you save will appear here.'
+}
+
+function renderSites () {
+    const queryPages = filterArchivePages(archivePages, getQuery())
+    const sites = countSites(queryPages)
+    if (selectedSite && !sites.some(({ site }) => site === selectedSite)) {
+        sites.unshift({ site: selectedSite, count: 0 })
+    }
+
+    const shown = showAllSites ? sites : sites.slice(0, SITE_LIMIT)
+    if (selectedSite && !shown.some(({ site }) => site === selectedSite)) {
+        shown.push(sites.find(({ site }) => site === selectedSite))
+    }
+
+    const nav = $('#siteList')
+    nav.replaceChildren(
+        createSiteLink('', 'All', queryPages.length),
+        ...shown.map(({ site, count }) => createSiteLink(site, site, count))
+    )
+
+    const hidden = sites.length - shown.length
+    if (hidden > 0) {
+        const more = document.createElement('button')
+        more.type = 'button'
+        more.className = 'more-sites'
+        more.textContent = `+${hidden}`
+        more.dataset.tooltip = `Show ${hidden} more sites`
+        nav.append(more)
+    }
+}
+
+function createSiteLink (site, label, count) {
+    const link = document.createElement('a')
+    link.className = site ? 'sidebar-link' : 'sidebar-link all-sites'
+    link.href = '#'
+    link.dataset.site = site
+    const isActive = site === selectedSite
+    link.classList.toggle('active', isActive)
+    if (isActive) link.setAttribute('aria-current', 'page')
+
+    if (site) {
+        const icon = document.createElement('img')
+        const src = getSiteFaviconUrl(`https://${site}`)
+        if (src) icon.src = src
+        icon.dataset.faviconFallback = getSiteFaviconFallbackUrl(`https://${site}`)
+        icon.addEventListener('error', () => applyFaviconFallback(icon))
+        icon.alt = ''
+        icon.loading = 'lazy'
+        link.append(icon)
+    } else {
+        const icon = document.createElement('img')
+        icon.className = 'all-icon'
+        icon.src = '../icons/archive.svg'
+        icon.alt = ''
+        link.append(icon)
+    }
+
+    const name = document.createElement('span')
+    name.className = 'site-name'
+    name.textContent = label
+
+    const total = document.createElement('span')
+    total.className = 'site-count'
+    total.textContent = count.toLocaleString()
+
+    link.append(name, total)
+    return link
 }
 
 function showLoadError () {

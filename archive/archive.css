@@ -10,6 +10,10 @@
     display: none !important;
 }
 
+html {
+    scroll-padding-top: 120px;
+}
+
 body {
     min-width: 320px;
     margin: 0;
@@ -19,8 +23,7 @@ body {
 }
 
 button,
-input,
-select {
+input {
     font: inherit;
 }
 
@@ -30,26 +33,160 @@ mark {
     color: inherit;
 }
 
-/* The items card: the popup's list and status bar, with search on top. */
+/* Sidebar: sites in place of Options' sections, popup status bar below. */
 
-.archive-card {
-    /* clip, not hidden, so the status bar can stick to the window bottom. */
-    overflow: clip;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
+.brand {
+    flex: none;
+}
+
+.site-nav {
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+    margin: 0 -6px;
+    padding: 0 6px 12px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.site-nav .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+}
+
+.site-nav .sidebar-link img {
+    flex: none;
+    width: 16px;
+    height: 16px;
+}
+
+.site-nav .all-icon {
+    filter: var(--icon-filter);
+}
+
+.site-nav .sidebar-link .site-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-weight: 500;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.site-nav .sidebar-link.all-sites {
+    margin-bottom: 6px;
+    padding-block: 10px;
+}
+
+.site-nav .sidebar-link.all-sites .site-name,
+.site-nav .sidebar-link.active .site-name {
+    font-weight: 650;
+}
+
+.site-nav .site-count {
+    flex: none;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+}
+
+.site-nav .sidebar-link.active .site-count {
+    color: inherit;
+}
+
+.site-nav .more-sites {
+    width: 100%;
+    padding: 7px 12px 7px 38px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    text-align: left;
+}
+
+.site-nav .more-sites:hover {
+    background: var(--surface-subtle);
+    color: var(--text);
+}
+
+.status-bar {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 12px 0 0 12px;
+    box-sizing: content-box;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+}
+
+#count {
+    margin-right: auto;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    cursor: default;
+}
+
+.count-separator {
+    white-space: pre;
+    opacity: 0.6;
+}
+
+#count[data-format="total"] :is(#row, .count-separator) {
+    display: none;
+}
+
+.status-bar a,
+.status-bar button {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.status-bar a:hover,
+.status-bar button:hover {
+    background: var(--selected);
+}
+
+.status-bar img {
+    width: 16px;
+    height: 16px;
+    filter: var(--icon-filter);
+}
+
+/* Search stays at the top; date headings stick below it. */
+
+.search-bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    margin-top: -24px;
+    padding: 16px 0 12px;
+    background: var(--background);
 }
 
 .search {
     position: relative;
     display: flex;
     align-items: center;
-    padding: 10px 10px 4px;
 }
 
 .search-icon {
     position: absolute;
-    left: 21px;
+    left: 11px;
     width: 14px;
     height: 14px;
     fill: none;
@@ -84,7 +221,7 @@ mark {
 
 .search kbd {
     position: absolute;
-    right: 18px;
+    right: 8px;
     min-width: 18px;
     padding: 0 5px;
     border: 1px solid var(--border);
@@ -100,14 +237,30 @@ mark {
     display: none;
 }
 
+/* Date groups: Options section headings over Options cards. */
+
+.archive-group {
+    padding-bottom: 28px;
+}
+
+.archive-group .section-heading {
+    position: sticky;
+    top: 62px;
+    z-index: 4;
+    padding-top: 8px;
+    background: var(--background);
+}
+
+.archive-group h2 {
+    margin: 0;
+}
+
+/* Rows: the popup's reading list, with the URL under each title. */
+
 .archive-list {
     margin: 0;
     padding: 6px;
     list-style: none;
-}
-
-.archive-list:empty {
-    display: none;
 }
 
 .archive-item {
@@ -115,7 +268,6 @@ mark {
     align-items: center;
     padding: 5px 10px;
     border-radius: 5px;
-    scroll-margin-block: 12px 48px;
 }
 
 .archive-item.active {
@@ -132,7 +284,6 @@ mark {
     cursor: pointer;
 }
 
-/* Themed delete icon, as in the popup. */
 .archive-item img[data-delete-action] {
     filter: var(--icon-filter);
     opacity: 0.8;
@@ -193,8 +344,11 @@ mark {
     color: var(--video);
 }
 
+.load-sentinel {
+    height: 1px;
+}
+
 .empty-state {
-    margin: 0;
     padding: 28px 24px;
     color: var(--muted);
     font-size: 13px;
@@ -208,38 +362,8 @@ mark {
     font-weight: 600;
 }
 
-.status-bar {
-    position: sticky;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    height: 30px;
-    padding: 0 16px 2px;
-    background: var(--surface);
-    color: var(--muted);
-    font-size: 12px;
-}
-
-#count {
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    cursor: default;
-}
-
-.count-separator {
-    white-space: pre;
-    opacity: 0.6;
-}
-
-#count[data-format="total"] :is(#row, .count-separator) {
-    display: none;
-}
-
-.load-sentinel {
-    height: 1px;
-}
-
 /* Same floating message as Options' save status. */
+
 .toast {
     position: fixed;
     right: 24px;
@@ -257,10 +381,6 @@ mark {
 
 .toast:empty {
     display: none;
-}
-
-.toast.warning {
-    color: var(--warning);
 }
 
 .toast.error {
@@ -289,7 +409,36 @@ mark {
     color: var(--accent-hover);
 }
 
-/* Keep the undo button clear of the status message. */
 body:has(#pageStatus:not(:empty)) .undo-toast {
     bottom: 76px;
+}
+
+@media (max-width: 860px) {
+    /* The top bar scrolls away so search and headings can stick. */
+    .sidebar {
+        position: static;
+    }
+
+    .site-nav {
+        flex: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .site-nav .sidebar-link,
+    .site-nav .sidebar-link.all-sites {
+        margin: 0;
+        padding: 7px 10px;
+    }
+
+    .site-nav .more-sites {
+        flex: none;
+        width: auto;
+        padding: 7px 10px;
+    }
+
+    .status-bar {
+        margin-top: 10px;
+        padding-top: 8px;
+    }
 }

@@ -11,99 +11,58 @@
 <body>
 <div class="settings-app">
     <aside class="sidebar">
-        <a class="brand" href="../options/options.html#general">
+        <a class="brand" href="archive.html" aria-label="Read Later archive">
             <img src="../icons/logo-orange48x48.png" alt="">
-            <strong>Read Later</strong>
+            <span>
+                <strong>Read Later</strong>
+                <small>Archive</small>
+            </span>
         </a>
 
-        <nav class="sidebar-nav" aria-label="Options sections">
-            <a class="sidebar-link" href="../options/options.html#general">
-                <span>General</span>
+        <nav id="siteList" class="sidebar-nav site-nav" aria-label="Sites"></nav>
+
+        <footer class="status-bar">
+            <span id="count">
+                <span id="row">0</span><span class="count-separator" aria-hidden="true"> / </span><span id="total">0</span>
+            </span>
+            <a id="options" href="../options/options.html#archive" data-tooltip="Archive options (,)"
+               aria-label="Archive options" aria-keyshortcuts=",">
+                <img src="../icons/options.svg" alt="">
             </a>
-            <a class="sidebar-link active" href="archive.html" aria-current="page">
-                <span>Archive</span>
-            </a>
-            <a class="sidebar-link" href="../options/options.html#storage">
-                <span>Storage</span>
-            </a>
-            <a class="sidebar-link" href="../options/options.html#import">
-                <span>Import</span>
-            </a>
-            <a class="sidebar-link" href="../options/options.html#export">
-                <span>Export</span>
-            </a>
-        </nav>
+            <button type="button" id="question" data-tooltip="Help and feedback (?)"
+                    aria-label="Help and feedback" aria-keyshortcuts="?">
+                <img src="../icons/question.svg" alt="">
+            </button>
+        </footer>
     </aside>
 
     <main class="content">
         <h1 class="visually-hidden">Archive</h1>
 
-        <section class="settings-section" aria-labelledby="archive-title">
-            <header class="section-heading">
-                <div>
-                    <h2 id="archive-title">Archive</h2>
-                    <p>Archived items are stored on this computer.</p>
-                </div>
-            </header>
+        <div class="search-bar">
+            <label class="search" for="archiveSearch">
+                <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true">
+                    <circle cx="7" cy="7" r="4.75"/>
+                    <path d="m10.5 10.5 3.25 3.25"/>
+                </svg>
+                <span class="visually-hidden">Search archive</span>
+                <input id="archiveSearch" type="search" autocomplete="off" spellcheck="false"
+                       placeholder="Search" aria-keyshortcuts="/">
+                <kbd aria-hidden="true">/</kbd>
+            </label>
+        </div>
 
-            <div class="option-list">
-                <label class="option-row" for="archiveMode">
-                    <input class="option-control" id="archiveMode" name="archiveMode" type="checkbox" role="switch">
-                    <span>
-                        <strong>Keep a reading list archive</strong>
-                        <small>Saved items stay here after you open or delete them.</small>
-                    </span>
-                </label>
+        <div id="archiveGroups"></div>
+        <div id="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
 
-                <div class="select-row">
-                    <label for="archiveRetentionDays">
-                        <strong>Delete archived items older than</strong>
-                        <small>Maximum 10,000 items.</small>
-                    </label>
-                    <select class="option-control" id="archiveRetentionDays" name="archiveRetentionDays">
-                        <option value="0">Never</option>
-                        <option value="7">1 week</option>
-                        <option value="30">1 month</option>
-                        <option value="90">3 months</option>
-                        <option value="180">6 months</option>
-                        <option value="365">1 year</option>
-                    </select>
-                </div>
-            </div>
-        </section>
-
-        <section class="settings-section" aria-label="Archived items">
-            <div class="archive-card">
-                <label class="search" for="archiveSearch">
-                    <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true">
-                        <circle cx="7" cy="7" r="4.75"/>
-                        <path d="m10.5 10.5 3.25 3.25"/>
-                    </svg>
-                    <span class="visually-hidden">Search archive</span>
-                    <input id="archiveSearch" type="search" autocomplete="off" spellcheck="false"
-                           placeholder="Search" aria-keyshortcuts="/">
-                    <kbd aria-hidden="true">/</kbd>
-                </label>
-
-                <ul id="archiveList" class="archive-list" aria-label="Archived items"></ul>
-                <div id="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
-                <p id="emptyState" class="empty-state" hidden>
-                    <strong id="emptyTitle">Archive is empty</strong>
-                    <span id="emptyMessage">Items you save will appear here.</span>
-                </p>
-
-                <footer class="status-bar">
-                    <span id="count">
-                        <span id="row">0</span><span class="count-separator" aria-hidden="true"> / </span><span id="total">0</span>
-                    </span>
-                </footer>
-            </div>
-        </section>
-
-        <p id="pageStatus" class="toast" role="status" aria-live="polite"></p>
+        <div id="emptyState" class="option-list empty-state" hidden>
+            <strong id="emptyTitle">Archive is empty</strong>
+            <span id="emptyMessage">Items you save will appear here.</span>
+        </div>
     </main>
 </div>
 
+<p id="pageStatus" class="toast" role="status" aria-live="polite"></p>
 <div id="undoToast" class="toast undo-toast" role="status" aria-live="polite" hidden>
     <span>Removed</span>
     <button id="undoRemove" type="button" data-tooltip="u">Undo</button>
