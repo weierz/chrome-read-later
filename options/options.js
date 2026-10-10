@@ -124,8 +124,8 @@ function readOptions () {
         itemNewTab:           $('#itemNewTab').prop('checked'),
         keepSavedTab:         $('#keepSavedTab').prop('checked'),
         itemHoverMode:        $('#itemHoverMode').val(),
-        selectedItemIconMode: $('#selectedItemIconMode').val(),
-        countFormat:          $('#countFormat').val(),
+        selectedItemIconMode: getChoice('selectedItemIconMode'),
+        countFormat:          getChoice('countFormat'),
         archiveMode:          $('#archiveMode').prop('checked'),
         archiveRetentionDays: Number($('#archiveRetentionDays').val()),
         isOptions:            true,
@@ -137,6 +137,15 @@ const itemHoverModeHints = {
     details: 'Shows the URL after a short pause, with the full title when it is cut off.',
     title:   'Titles that are cut off scroll so you can read them in place.',
     never:   'Titles stay still and no details are shown.',
+}
+
+// Toggle groups are radio buttons sharing a name.
+const getChoice = name => $(`input[name="${name}"]:checked`).val()
+
+function setChoice (name, value) {
+    $(`input[name="${name}"]`).each((_, input) => {
+        input.checked = input.value === value
+    })
 }
 
 function updateOptionHints () {
@@ -152,8 +161,8 @@ function applyOptions (options) {
     $('#itemNewTab').prop('checked', options?.itemNewTab)
     $('#keepSavedTab').prop('checked', options?.keepSavedTab)
     $('#itemHoverMode').val(options?.itemHoverMode)
-    $('#selectedItemIconMode').val(options?.selectedItemIconMode)
-    $('#countFormat').val(options?.countFormat ?? 'slash')
+    setChoice('selectedItemIconMode', options?.selectedItemIconMode ?? 'always')
+    setChoice('countFormat', options?.countFormat ?? 'slash')
     $('#archiveMode').prop('checked', options?.archiveMode)
     $('#archiveRetentionDays').val(String(options?.archiveRetentionDays ?? 0))
     updateOptionHints()
@@ -383,7 +392,7 @@ function updateImportButton () {
 }
 
 function bindExportControls () {
-    $('#exportFormat').on('change', renderExport)
+    $('input[name="exportFormat"]').on('change', renderExport)
     $('#copy').on('click', copyExport)
     $('#download').on('click', downloadExport)
 }
@@ -427,7 +436,7 @@ function simplifyPage (page) {
 }
 
 function renderExport () {
-    const format = $('#exportFormat').val()
+    const format = getChoice('exportFormat')
     $('#json-output').text(serializeReadingList(exportItems, format))
     $('#download').text(`Download ${format.toUpperCase()}`)
 }
@@ -451,7 +460,7 @@ async function copyExport () {
 }
 
 function downloadExport () {
-    const format = $('#exportFormat').val()
+    const format = getChoice('exportFormat')
     const mimeType = format === 'json'
         ? 'application/json'
         : 'application/x-ndjson'
@@ -466,7 +475,7 @@ function downloadExport () {
 }
 
 function getExportOutput () {
-    return serializeReadingList(exportItems, $('#exportFormat').val())
+    return serializeReadingList(exportItems, getChoice('exportFormat'))
 }
 
 function setStatus ($element, message, type = '') {

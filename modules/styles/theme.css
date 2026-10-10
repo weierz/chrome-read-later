@@ -8,6 +8,7 @@
     --background: #f6f7f9;
     --surface: #ffffff;
     --surface-subtle: #f1f3f5;
+    --surface-raised: #ffffff;
     --selected: #eceef1;
     --border: #e3e6ea;
     --border-strong: #a3a9b1;
@@ -78,6 +79,7 @@ select:hover:not(:disabled) {
         --background: #1f2023;
         --surface: #28292c;
         --surface-subtle: #303134;
+        --surface-raised: #4a4c50;
         --selected: #393b3f;
         --border: #3c4043;
         --border-strong: #70757c;

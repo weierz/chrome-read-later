@@ -258,6 +258,70 @@ small {
     font-size: 12px;
 }
 
+.select-row > .row-label {
+    min-width: 0;
+    flex: 1;
+}
+
+/* Toggle group: a short set of choices shown side by side. Radio inputs
+   underneath keep arrow-key and screen reader behavior. */
+.segmented {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 7px;
+    background: var(--surface-subtle);
+}
+
+.segmented label {
+    position: relative;
+    display: block;
+    cursor: pointer;
+}
+
+.segmented input,
+.segmented input:disabled {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.segmented span {
+    display: block;
+    min-width: 44px;
+    padding: 5px 12px;
+    border-radius: 5px;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 20px;
+    text-align: center;
+    white-space: nowrap;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.segmented label:hover span {
+    color: var(--text);
+}
+
+.segmented input:checked + span {
+    background: var(--surface-raised);
+    box-shadow: 0 1px 2px rgb(0 0 0 / 12%);
+    color: var(--text);
+    font-weight: 500;
+}
+
+.segmented input:focus-visible + span {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+.segmented input:disabled + span {
+    opacity: 0.55;
+}
+
 /* A select that depends on the switch above it. */
 .select-row:not(.top-level) {
     padding-left: 34px;

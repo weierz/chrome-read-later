@@ -241,11 +241,6 @@ h1 {
     flex: 0 0 auto;
 }
 
-.export-actions label {
-    color: var(--muted);
-    font-size: 11px;
-}
-
 @media (max-width: 860px) {
     html {
         scroll-padding-top: 150px;
