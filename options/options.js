@@ -126,8 +126,6 @@ function readOptions () {
         itemHoverMode:        $('#itemHoverMode').val(),
         selectedItemIconMode: $('#selectedItemIconMode').val(),
         countFormat:          $('#countFormat').val(),
-        archiveMode:          $('#archiveMode').prop('checked'),
-        archiveRetentionDays: Number($('#archiveRetentionDays').val()),
         isOptions:            true,
     }
 }
@@ -154,8 +152,6 @@ function applyOptions (options) {
     $('#itemHoverMode').val(options?.itemHoverMode)
     $('#selectedItemIconMode').val(options?.selectedItemIconMode)
     $('#countFormat').val(options?.countFormat ?? 'slash')
-    $('#archiveMode').prop('checked', options?.archiveMode)
-    $('#archiveRetentionDays').val(String(options?.archiveRetentionDays ?? 0))
     updateOptionHints()
 }
 
@@ -189,10 +185,6 @@ async function updateStorageStatus () {
 
 function enableAvailableOptionControls () {
     $('.option-control').prop('disabled', false)
-    $('#archiveRetentionDays').prop(
-        'disabled',
-        !$('#archiveMode').prop('checked')
-    )
 }
 
 function bindImportControls () {

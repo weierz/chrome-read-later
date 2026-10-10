@@ -22,13 +22,8 @@ const TITLE_TOOLTIP_DELAY = 800
 const DELETE_ICON = '../icons/delete-black.svg'
 const HELP_URL = 'https://github.com/willbchang/chrome-read-later#readme'
 const countSeparators = { slash: ' / ', colon: ':' }
-const thisYear = new Date().getFullYear()
-const shortDate = new Intl.DateTimeFormat(undefined, {
-    month: 'short', day: 'numeric',
-})
-const longDate = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
-const fullDate = new Intl.DateTimeFormat(undefined, {
-    dateStyle: 'full', timeStyle: 'short',
+const savedDate = new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium', timeStyle: 'short',
 })
 
 let options = {}
@@ -41,6 +36,8 @@ let lastKey = 'none'
 let lastPointer
 let removedPages = []
 let undoTimer
+let settingsSaveQueue = Promise.resolve()
+let settingsChangeId = 0
 
 const $ = selector => document.querySelector(selector)
 const list = () => $('#archiveList')
@@ -61,6 +58,7 @@ async function init () {
         ])
         options = storedOptions || {}
         applyFontPreference(options)
+        applySettings()
         archivePages = pages.filter(page => page.url)
         applyFilter()
     } catch (error) {
@@ -77,16 +75,8 @@ function bindEvents () {
     list().addEventListener('mousemove', handleMouseMove)
     list().addEventListener('click', handleListClick)
     list().addEventListener('auxclick', handleListClick)
-    // Long titles get a tooltip, like the popup's details hover.
-    list().addEventListener('mouseover', ({ target }) => {
-        const title = target.closest?.('.item-title')
-        if (!title || title.dataset.tooltip) return
-        if (title.scrollWidth > title.clientWidth) {
-            title.dataset.tooltip = title.textContent
-        }
-    }, true)
-
-    $('#question').addEventListener('click', openHelp)
+    document.querySelectorAll('.option-control').forEach(control =>
+        control.addEventListener('change', saveSettings))
     $('#undoRemove').addEventListener('click', undoRemove)
     document.addEventListener('keydown', handleKey)
 
@@ -120,7 +110,7 @@ function handleSearchKey (event) {
 }
 
 function handleKey (event) {
-    if (event.target.closest?.('input, textarea, select, .undo-toast, .status-bar, .sidebar')) {
+    if (event.target.closest?.('input, textarea, select, button, a:not(.item-title)')) {
         return
     }
 
@@ -179,6 +169,45 @@ function handleListClick (event) {
     }
 }
 
+function applySettings () {
+    $('#archiveMode').checked = options.archiveMode
+    $('#archiveRetentionDays').value = String(options.archiveRetentionDays ?? 0)
+    $('#archiveRetentionDays').disabled = !options.archiveMode
+}
+
+function saveSettings () {
+    const changes = {
+        archiveMode:          $('#archiveMode').checked,
+        archiveRetentionDays: Number($('#archiveRetentionDays').value),
+    }
+    const changeId = ++settingsChangeId
+    $('#archiveRetentionDays').disabled = !changes.archiveMode
+    setPageStatus('')
+    // Serialize writes so an older result never replaces a newer choice.
+    settingsSaveQueue = settingsSaveQueue.then(() =>
+        persistSettings(changes, changeId))
+}
+
+async function persistSettings (changes, changeId) {
+    try {
+        const result = await storage.setOptions(changes)
+        if (changeId !== settingsChangeId) return
+        options = result.options
+        applySettings()
+        // A shorter retention period may have removed old items.
+        const pages = await storage.local.sortByLatest()
+        archivePages = pages.filter(page => page.url)
+        const query = getQuery()
+        filteredPages = filterArchivePages(archivePages, query)
+        render()
+    } catch (error) {
+        console.error('Read Later: unable to save archive settings.', error)
+        if (changeId !== settingsChangeId) return
+        applySettings()
+        setPageStatus('Could not save these options.', 'error')
+    }
+}
+
 function applyFilter () {
     visibleCount = PAGE_SIZE
     filteredPages = filterArchivePages(archivePages, getQuery())
@@ -218,11 +247,14 @@ function createItem (page, query) {
     const text = document.createElement('div')
     text.className = 'item-text'
 
+    // Like the popup's details hover: full title, then when it was saved.
     const title = document.createElement('a')
     title.className = 'item-title'
     title.href = page.url
     title.tabIndex = -1
+    title.dataset.tooltip = page.title || page.url
     title.dataset.tooltipDelay = TITLE_TOOLTIP_DELAY
+    title.dataset.tooltipDetail = savedDate.format(page.date)
     if (!page.title || page.title === page.url) title.classList.add('url-only')
     appendHighlighted(title, page.title || page.url, query)
 
@@ -240,16 +272,6 @@ function createItem (page, query) {
         percent.textContent = progress.label
         item.append(percent)
     }
-
-    const date = new Date(page.date)
-    const time = document.createElement('time')
-    time.className = 'item-time'
-    time.dateTime = date.toISOString()
-    time.textContent = date.getFullYear() === thisYear
-        ? shortDate.format(date)
-        : longDate.format(date)
-    time.dataset.tooltip = fullDate.format(date)
-    item.append(time)
 
     return item
 }
@@ -458,6 +480,6 @@ function showLoadError () {
 
 function setPageStatus (message, type = '') {
     const status = $('#pageStatus')
-    status.className = `page-status ${type}`
+    status.className = `toast ${type}`
     status.textContent = message
 }

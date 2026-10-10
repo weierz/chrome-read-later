@@ -19,7 +19,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
     font: inherit;
 }
 
@@ -29,36 +30,39 @@ mark {
     color: inherit;
 }
 
-/* Heading row, like an Options section heading with the search beside it. */
+/* The items card: the popup's list and status bar, with search on top. */
 
-.archive-heading {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: -40px;
-    padding: 40px 4px 12px;
-    background: var(--background);
-}
-
-h1 {
-    margin: 0;
-    font-size: 17px;
-    line-height: 1.3;
-    letter-spacing: -0.01em;
+.archive-card {
+    /* clip, not hidden, so the status bar can stick to the window bottom. */
+    overflow: clip;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
 }
 
 .search {
-    width: min(280px, 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 10px 10px 4px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 21px;
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    pointer-events: none;
 }
 
 .search input {
     width: 100%;
     height: 34px;
-    padding: 0 10px;
+    padding: 0 34px 0 32px;
     border: 1px solid var(--border);
     border-radius: 6px;
     background: var(--surface);
@@ -74,13 +78,26 @@ h1 {
     color: var(--muted);
 }
 
-/* The card: the popup list and status bar at page size. */
+.search input::-webkit-search-cancel-button {
+    display: none;
+}
 
-.archive-card {
-    overflow: clip;
+.search kbd {
+    position: absolute;
+    right: 18px;
+    min-width: 18px;
+    padding: 0 5px;
     border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
+    border-radius: 4px;
+    color: var(--muted);
+    font: 11px/16px var(--font-ui);
+    text-align: center;
+    pointer-events: none;
+}
+
+.search input:focus ~ kbd,
+.search input:not(:placeholder-shown) ~ kbd {
+    display: none;
 }
 
 .archive-list {
@@ -96,10 +113,9 @@ h1 {
 .archive-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 10px;
+    padding: 5px 10px;
     border-radius: 5px;
-    scroll-margin-block: 72px 48px;
+    scroll-margin-block: 12px 48px;
 }
 
 .archive-item.active {
@@ -110,6 +126,7 @@ h1 {
     flex: none;
     width: 16px;
     height: 16px;
+    margin-right: 8px;
     padding: 1px;
     box-sizing: content-box;
     cursor: pointer;
@@ -140,7 +157,7 @@ h1 {
 
 .item-title {
     color: var(--text);
-    line-height: 20px;
+    line-height: 22px;
     text-decoration: none;
     cursor: default;
 }
@@ -157,9 +174,11 @@ h1 {
 
 .percent {
     flex: none;
+    padding-left: 5px;
     font-size: 12px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
+    cursor: default;
 }
 
 .percent.scroll {
@@ -172,15 +191,6 @@ h1 {
 
 .percent.video {
     color: var(--video);
-}
-
-.item-time {
-    flex: none;
-    min-width: 52px;
-    color: var(--muted);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
 }
 
 .empty-state {
@@ -198,24 +208,19 @@ h1 {
     font-weight: 600;
 }
 
-/* Status bar, as in the popup; it stays in view at the window bottom. */
-
 .status-bar {
     position: sticky;
     bottom: 0;
     display: flex;
     align-items: center;
-    gap: 4px;
-    height: 36px;
-    padding: 0 10px 0 16px;
-    border-top: 1px solid var(--border);
+    height: 30px;
+    padding: 0 16px 2px;
     background: var(--surface);
     color: var(--muted);
     font-size: 12px;
 }
 
 #count {
-    margin-right: auto;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     cursor: default;
@@ -230,68 +235,43 @@ h1 {
     display: none;
 }
 
-.status-bar button {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: 0;
-    border-radius: 6px;
-    background: transparent;
-    cursor: pointer;
-}
-
-.status-bar button:hover,
-.status-bar button:focus-visible {
-    background: var(--selected);
-}
-
-.status-bar img {
-    width: 16px;
-    height: 16px;
-    filter: var(--icon-filter);
-}
-
-.page-status {
-    margin: 0 4px 12px;
-    font-size: 13px;
-}
-
-.page-status:empty {
-    display: none;
-}
-
-.page-status.error {
-    color: var(--error);
-}
-
 .load-sentinel {
     height: 1px;
 }
 
-.undo-toast {
+/* Same floating message as Options' save status. */
+.toast {
     position: fixed;
+    right: 24px;
     bottom: 24px;
-    left: 50%;
     z-index: 20;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 6px 6px 6px 14px;
+    max-width: min(420px, calc(100vw - 48px));
+    margin: 0;
+    padding: 10px 14px;
     border: 1px solid var(--border-strong);
     border-radius: 8px;
     background: var(--surface);
     box-shadow: var(--shadow);
     font-size: 13px;
-    opacity: 0;
-    transform: translate(-50%, 8px);
-    transition: opacity 160ms ease, transform 160ms ease;
 }
 
-.undo-toast.visible {
-    opacity: 1;
-    transform: translate(-50%, 0);
+.toast:empty {
+    display: none;
+}
+
+.toast.warning {
+    color: var(--warning);
+}
+
+.toast.error {
+    color: var(--error);
+}
+
+.undo-toast {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 6px 6px 6px 14px;
 }
 
 .undo-toast button {
@@ -309,26 +289,7 @@ h1 {
     color: var(--accent-hover);
 }
 
-@media (max-width: 860px) {
-    .archive-heading {
-        position: static;
-        margin-top: 0;
-        padding-top: 0;
-    }
-
-    .archive-item {
-        scroll-margin-block: 16px 48px;
-    }
-}
-
-@media (max-width: 520px) {
-    .item-time {
-        display: none;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .undo-toast {
-        transition: none;
-    }
+/* Keep the undo button clear of the status message. */
+body:has(#pageStatus:not(:empty)) .undo-toast {
+    bottom: 76px;
 }

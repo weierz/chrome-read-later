@@ -12,19 +12,16 @@
 <body>
 <div class="settings-app">
     <aside class="sidebar">
-        <a class="brand" href="#general" aria-label="Read Later options">
+        <a class="brand" href="#general">
             <img src="../icons/logo-orange48x48.png" alt="">
-            <span>
-                <strong>Read Later</strong>
-                <small>Options</small>
-            </span>
+            <strong>Read Later</strong>
         </a>
 
         <nav class="sidebar-nav" aria-label="Options sections">
             <a class="sidebar-link active" href="#general" aria-current="page">
                 <span>General</span>
             </a>
-            <a class="sidebar-link" href="#archive">
+            <a class="sidebar-link" href="../archive/archive.html">
                 <span>Archive</span>
             </a>
             <a class="sidebar-link" href="#storage">
@@ -116,40 +113,6 @@
                         <option value="slash">1 / 12</option>
                         <option value="colon">1:12</option>
                         <option value="total">12</option>
-                    </select>
-                </div>
-            </div>
-        </section>
-
-        <section id="archive" class="settings-section" aria-labelledby="archive-title">
-            <header class="section-heading">
-                <div>
-                    <h2 id="archive-title">Archive</h2>
-                    <p>Archived items are stored on this computer.</p>
-                </div>
-            </header>
-
-            <div class="option-list">
-                <label class="option-row" for="archiveMode">
-                    <input class="option-control" id="archiveMode" name="archiveMode" type="checkbox" role="switch">
-                    <span>
-                        <strong>Keep a reading list archive</strong>
-                        <small>Saved items remain available in Archive.</small>
-                    </span>
-                </label>
-
-                <div class="select-row">
-                    <label for="archiveRetentionDays">
-                        <strong>Delete archived items older than</strong>
-                        <small>Maximum 10,000 items.</small>
-                    </label>
-                    <select class="option-control" id="archiveRetentionDays" name="archiveRetentionDays">
-                        <option value="0">Never</option>
-                        <option value="7">1 week</option>
-                        <option value="30">1 month</option>
-                        <option value="90">3 months</option>
-                        <option value="180">6 months</option>
-                        <option value="365">1 year</option>
                     </select>
                 </div>
             </div>
