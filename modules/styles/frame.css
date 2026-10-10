@@ -290,7 +290,7 @@ small {
 }
 
 .segmented span {
-    display: block;
+    display: grid;
     min-width: 44px;
     padding: 5px 12px;
     border-radius: 5px;
@@ -300,6 +300,17 @@ small {
     text-align: center;
     white-space: nowrap;
     transition: background-color 120ms ease, color 120ms ease;
+}
+
+/* Reserve the bold width so choosing an option doesn't resize the group. */
+.segmented span::after {
+    content: attr(data-label);
+    height: 0;
+    overflow: hidden;
+    font-weight: 500;
+    visibility: hidden;
+    pointer-events: none;
+    user-select: none;
 }
 
 .segmented label:hover span {

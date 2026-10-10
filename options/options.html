@@ -101,9 +101,9 @@
                         <small>The selected item's icon turns into a delete button.</small>
                     </span>
                     <div class="segmented" role="radiogroup" aria-labelledby="selectedItemIconModeLabel">
-                        <label data-tooltip="With mouse and keyboard"><input class="option-control" type="radio" name="selectedItemIconMode" value="always"><span>Always</span></label>
-                        <label data-tooltip="Only when selected with the mouse"><input class="option-control" type="radio" name="selectedItemIconMode" value="mixed"><span>Mouse</span></label>
-                        <label><input class="option-control" type="radio" name="selectedItemIconMode" value="never"><span>Never</span></label>
+                        <label data-tooltip="With mouse and keyboard"><input class="option-control" type="radio" name="selectedItemIconMode" value="always"><span data-label="Always">Always</span></label>
+                        <label data-tooltip="Only when selected with the mouse"><input class="option-control" type="radio" name="selectedItemIconMode" value="mixed"><span data-label="Mouse">Mouse</span></label>
+                        <label><input class="option-control" type="radio" name="selectedItemIconMode" value="never"><span data-label="Never">Never</span></label>
                     </div>
                 </div>
 
@@ -113,9 +113,9 @@
                         <small>Shown at the bottom of the popup.</small>
                     </span>
                     <div class="segmented" role="radiogroup" aria-labelledby="countFormatLabel">
-                        <label><input class="option-control" type="radio" name="countFormat" value="slash"><span>1 / 12</span></label>
-                        <label><input class="option-control" type="radio" name="countFormat" value="colon"><span>1:12</span></label>
-                        <label><input class="option-control" type="radio" name="countFormat" value="total"><span>12</span></label>
+                        <label><input class="option-control" type="radio" name="countFormat" value="slash"><span data-label="1 / 12">1 / 12</span></label>
+                        <label><input class="option-control" type="radio" name="countFormat" value="colon"><span data-label="1:12">1:12</span></label>
+                        <label><input class="option-control" type="radio" name="countFormat" value="total"><span data-label="12">12</span></label>
                     </div>
                 </div>
             </div>
@@ -212,8 +212,8 @@
                 </div>
                 <div class="export-actions">
 <div class="segmented" role="radiogroup" aria-label="Export format">
-                        <label><input type="radio" name="exportFormat" value="json" checked><span>JSON</span></label>
-                        <label><input type="radio" name="exportFormat" value="jsonl"><span>JSONL</span></label>
+                        <label><input type="radio" name="exportFormat" value="json" checked><span data-label="JSON">JSON</span></label>
+                        <label><input type="radio" name="exportFormat" value="jsonl"><span data-label="JSONL">JSONL</span></label>
                     </div>
                     <button id="copy" class="secondary-button" type="button">Copy</button>
                     <button id="download" type="button">Download JSON</button>
