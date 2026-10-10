@@ -1,24 +1,41 @@
-const screenshot = document.querySelector('#product-screenshot');
-const fullScreenshot = document.querySelector('#full-screenshot');
-const themeControls = document.querySelector('.screenshot-themes');
-const themeButtons = themeControls.querySelectorAll('button');
+// Runs the real popup (popup/popup.html with its own CSS and scripts) inside
+// the hero, with demo-chrome.js standing in for Chrome's extension APIs.
+const frame = document.querySelector('#demo')
+const notice = document.querySelector('#demoNotice')
+const reset = document.querySelector('#demoReset')
+const initialNotice = notice.innerHTML
+const popupUrl = new URL('popup/popup.html', document.baseURI)
+const shimUrl = new URL('landing/demo-chrome.js', document.baseURI)
+let popupHtml
 
-const screenshots = {
-  light: 'landing/images/read-later-light.png',
-  dark: 'landing/images/read-later-dark.png',
-};
+async function loadDemo () {
+    popupHtml ??= await (await fetch(popupUrl)).text()
+    frame.srcdoc = popupHtml.replace('<head>',
+        `<head><base href="${new URL('.', popupUrl)}"><script src="${shimUrl}"></script>`)
+    await new Promise(resolve => frame.addEventListener('load', resolve, { once: true }))
 
-themeControls.hidden = false;
-
-for (const button of themeButtons) {
-  button.addEventListener('click', () => {
-    const theme = button.dataset.screenshotTheme;
-    screenshot.src = screenshots[theme];
-    screenshot.alt = `Read Later in ${theme} appearance, showing saved pages, orange reading progress, blue video progress, and Archive, Options, and Help controls.`;
-    fullScreenshot.href = screenshots[theme];
-
-    for (const themeButton of themeButtons) {
-      themeButton.setAttribute('aria-pressed', String(themeButton === button));
-    }
-  });
+    // Size the frame to the popup, as Chrome sizes the real one.
+    const body = frame.contentDocument.body
+    new ResizeObserver(() => {
+        frame.style.height = `${Math.ceil(body.getBoundingClientRect().height)}px`
+    }).observe(body)
 }
+
+addEventListener('message', event => {
+    if (event.origin !== location.origin || !event.data?.readLaterDemo) return
+    notice.textContent = event.data.readLaterDemo
+    reset.hidden = false
+})
+
+reset.addEventListener('click', async () => {
+    reset.hidden = true
+    notice.innerHTML = initialNotice
+    await loadDemo()
+    frame.contentWindow.focus()
+})
+
+loadDemo().catch(error => {
+    console.error('Read Later: unable to load the popup demo.', error)
+    frame.hidden = true
+    notice.textContent = 'The popup preview could not be loaded.'
+})
