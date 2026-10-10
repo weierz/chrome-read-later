@@ -9,53 +9,61 @@
     <script type="module" src="archive.js"></script>
 </head>
 <body>
-<header class="topbar">
-    <a class="brand" href="archive.html">
-        <img src="../icons/logo-orange48x48.png" alt="">
-        <span>Archive</span>
-        <span id="archiveCount" class="brand-count" aria-live="polite"></span>
-    </a>
+<div class="settings-app">
+    <aside class="sidebar">
+        <a class="brand" href="archive.html" aria-label="Read Later archive">
+            <img src="../icons/logo-orange48x48.png" alt="">
+            <span>
+                <strong>Read Later</strong>
+                <small>Archive</small>
+            </span>
+        </a>
 
-    <label class="search" for="archiveSearch">
-        <svg class="search-icon" viewBox="0 0 16 16" aria-hidden="true">
-            <circle cx="7" cy="7" r="4.75"/>
-            <path d="m10.5 10.5 3.25 3.25"/>
-        </svg>
-        <span class="visually-hidden">Search archive</span>
-        <input id="archiveSearch" type="search" autocomplete="off" spellcheck="false"
-               placeholder="Search" title="Search titles and URLs">
-        <kbd class="search-key" aria-hidden="true">/</kbd>
-    </label>
+        <nav class="sidebar-nav" aria-label="Pages">
+            <a class="sidebar-link active" href="archive.html" aria-current="page">
+                <span>Archive</span>
+            </a>
+            <a class="sidebar-link" href="../options/options.html">
+                <span>Options</span>
+            </a>
+        </nav>
+    </aside>
 
-    <a class="settings-link" href="../options/options.html#archive"
-       title="Archive settings" aria-label="Archive settings">
-        <img src="../icons/options.svg" alt="">
-    </a>
-</header>
+    <main class="content">
+        <header class="archive-heading">
+            <h1>Archive</h1>
+            <label class="search" for="archiveSearch">
+                <span class="visually-hidden">Search archive</span>
+                <input id="archiveSearch" type="search" autocomplete="off" spellcheck="false"
+                       placeholder="Search" aria-keyshortcuts="/">
+            </label>
+        </header>
 
-<div class="layout">
-    <nav class="sites" aria-label="Sites">
-        <ul id="siteList" class="site-list"></ul>
-    </nav>
-
-    <main class="timeline" aria-labelledby="archive-list-title">
-        <h1 id="archive-list-title" class="visually-hidden">Archive</h1>
         <p id="pageStatus" class="page-status" role="status" aria-live="polite"></p>
-        <div id="archiveGroups"></div>
-        <div id="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
 
-        <div id="emptyState" class="empty-state" hidden>
-            <img src="../icons/archive.svg" alt="">
-            <h2 id="emptyTitle">Archive is empty</h2>
-            <p id="emptyMessage">Items you save will appear here.</p>
-            <button id="clearFilters" class="clear-filters" type="button" hidden>Clear search</button>
+        <div class="archive-card">
+            <ul id="archiveList" class="archive-list" aria-label="Archived items"></ul>
+            <div id="loadSentinel" class="load-sentinel" aria-hidden="true"></div>
+            <p id="emptyState" class="empty-state" hidden>
+                <strong id="emptyTitle">Archive is empty</strong>
+                <span id="emptyMessage">Items you save will appear here.</span>
+            </p>
+            <footer class="status-bar">
+                <span id="count">
+                    <span id="row">0</span><span class="count-separator" aria-hidden="true"> / </span><span id="total">0</span>
+                </span>
+                <button type="button" id="question" data-tooltip="Help and feedback (?)"
+                        aria-label="Help and feedback" aria-keyshortcuts="?">
+                    <img src="../icons/question.svg" alt="">
+                </button>
+            </footer>
         </div>
     </main>
 </div>
 
 <div id="undoToast" class="undo-toast" role="status" aria-live="polite" hidden>
     <span>Removed</span>
-    <button id="undoRemove" type="button">Undo</button>
+    <button id="undoRemove" type="button" data-tooltip="u">Undo</button>
 </div>
 </body>
 </html>

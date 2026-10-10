@@ -1,53 +1,65 @@
 import * as runtime from '../modules/chrome/runtime.mjs'
 import * as storage from '../modules/chrome/storage.mjs'
 import { applyFontPreference } from '../modules/appearance.mjs'
+import { hideTooltipWithin, setupTooltips } from '../modules/tooltip.mjs'
 import {
     applyFaviconFallback,
     getSiteFaviconFallbackUrl,
     getSiteFaviconUrl,
 } from '../modules/favicon.mjs'
+import { shouldShowDeleteIcon } from '../popup/selectionIcon.mjs'
 import {
-    countSites,
     filterArchivePages,
+    getArchiveKeyBinding,
     getArchiveProgress,
     getDisplayUrl,
-    getSiteName,
-    groupArchivePages,
     splitMatches,
 } from './archiveView.mjs'
 
 const PAGE_SIZE = 100
-const SITE_LIMIT = 30
 const UNDO_DURATION = 6000
-const timeFormatter = new Intl.DateTimeFormat(undefined, { timeStyle: 'short' })
-const dayFormatter = new Intl.DateTimeFormat(undefined, {
+const TITLE_TOOLTIP_DELAY = 800
+const DELETE_ICON = '../icons/delete-black.svg'
+const HELP_URL = 'https://github.com/willbchang/chrome-read-later#readme'
+const countSeparators = { slash: ' / ', colon: ':' }
+const thisYear = new Date().getFullYear()
+const shortDate = new Intl.DateTimeFormat(undefined, {
     month: 'short', day: 'numeric',
 })
-const fullFormatter = new Intl.DateTimeFormat(undefined, {
+const longDate = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' })
+const fullDate = new Intl.DateTimeFormat(undefined, {
     dateStyle: 'full', timeStyle: 'short',
 })
 
+let options = {}
 let archivePages = []
 let filteredPages = []
-let selectedSite = ''
-let showAllSites = false
-let removedPage
-let undoTimer
 let visibleCount = PAGE_SIZE
+let activeUrl
+let lastInputType = 'initial'
+let lastKey = 'none'
+let lastPointer
+let removedPages = []
+let undoTimer
 
 const $ = selector => document.querySelector(selector)
+const list = () => $('#archiveList')
+const items = () => [...list().children]
+const activeItem = () => list().querySelector('.archive-item.active')
 const getQuery = () => $('#archiveSearch').value
 
 document.addEventListener('DOMContentLoaded', init)
 
 async function init () {
+    setupTooltips()
     bindEvents()
 
     try {
-        const [pages, options] = await Promise.all([
+        const [pages, storedOptions] = await Promise.all([
             storage.local.sortByLatest(),
             storage.getOptions(),
         ])
+        options = storedOptions || {}
         applyFontPreference(options)
         archivePages = pages.filter(page => page.url)
         applyFilter()
@@ -55,247 +67,191 @@ async function init () {
         console.error('Read Later: unable to load the archive.', error)
         showLoadError()
     }
-
-    requestAnimationFrame(() => document.body.classList.add('is-ready'))
 }
 
 function bindEvents () {
-    $('#archiveSearch').addEventListener('input', () => applyFilter())
-    $('#undoRemove').addEventListener('click', undoRemove)
-    $('#clearFilters').addEventListener('click', () => {
-        $('#archiveSearch').value = ''
-        selectedSite = ''
-        applyFilter()
-        $('#archiveSearch').focus()
-    })
-    $('#siteList').addEventListener('click', event => {
-        const button = event.target.closest('button')
-        if (!button) return
-        if (button.dataset.more) {
-            showAllSites = true
-            renderSites()
-            return
+    const search = $('#archiveSearch')
+    search.addEventListener('input', applyFilter)
+    search.addEventListener('keydown', handleSearchKey)
+
+    list().addEventListener('mousemove', handleMouseMove)
+    list().addEventListener('click', handleListClick)
+    list().addEventListener('auxclick', handleListClick)
+    // Long titles get a tooltip, like the popup's details hover.
+    list().addEventListener('mouseover', ({ target }) => {
+        const title = target.closest?.('.item-title')
+        if (!title || title.dataset.tooltip) return
+        if (title.scrollWidth > title.clientWidth) {
+            title.dataset.tooltip = title.textContent
         }
-        selectedSite = button.dataset.site === selectedSite
-            ? ''
-            : button.dataset.site
-        applyFilter()
-    })
-    $('#archiveGroups').addEventListener('click', handleListClick)
-    document.addEventListener('keydown', handleShortcut)
+    }, true)
+
+    $('#question').addEventListener('click', openHelp)
+    $('#undoRemove').addEventListener('click', undoRemove)
+    document.addEventListener('keydown', handleKey)
 
     new IntersectionObserver(entries => {
         if (!entries[0].isIntersecting) return
         if (visibleCount >= filteredPages.length) return
         visibleCount += PAGE_SIZE
-        renderArchive()
-    }, { rootMargin: '800px 0px' }).observe($('#loadSentinel'))
+        render()
+    }, { rootMargin: '600px 0px' }).observe($('#loadSentinel'))
+}
+
+function handleSearchKey (event) {
+    const search = event.currentTarget
+    if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        if (search.value) {
+            search.value = ''
+            applyFilter()
+        } else {
+            search.blur()
+        }
+    } else if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        search.blur()
+        selectItem(items()[0], 'keyboard')
+    } else if (event.key === 'Enter' && !event.isComposing) {
+        event.preventDefault()
+        openActive({ active: !(event.metaKey || event.ctrlKey) })
+    }
+}
+
+function handleKey (event) {
+    if (event.target.closest?.('input, textarea, select, .undo-toast, .status-bar, .sidebar')) {
+        return
+    }
+
+    const binding = getArchiveKeyBinding(event, lastKey)
+    lastKey = binding
+    const action = {
+        Enter:              () => openActive({ active: true }),
+        o:                  () => openActive({ active: true }),
+        'Meta + Enter':     () => openActive({ active: false }),
+        O:                  () => openActive({ active: false }),
+        j:                  () => moveTo('next'),
+        k:                  () => moveTo('previous'),
+        ArrowDown:          () => moveTo('next'),
+        ArrowUp:            () => moveTo('previous'),
+        gg:                 () => moveTo('top'),
+        G:                  () => moveTo('bottom'),
+        'Meta + ArrowUp':   () => moveTo('top'),
+        'Meta + ArrowDown': () => moveTo('bottom'),
+        dd:                 () => removeItem(activeItem()),
+        Backspace:          () => removeItem(activeItem()),
+        Delete:             () => removeItem(activeItem()),
+        u:                  undoRemove,
+        'Meta + z':         undoRemove,
+        yy:                 copyActiveUrl,
+        '/':                focusSearch,
+        ',':                openOptions,
+        '?':                openHelp,
+    }[binding]
+
+    if (!action) return
+    event.preventDefault()
+    action()
+}
+
+function handleMouseMove (event) {
+    // Scrolling under a still pointer fires mousemove; ignore it so the
+    // keyboard selection stays put, as in the popup.
+    const pointer = `${event.screenX},${event.screenY}`
+    if (pointer === lastPointer) return
+    lastPointer = pointer
+    const item = event.target.closest('.archive-item')
+    if (item) selectItem(item, 'mouse')
 }
 
 function handleListClick (event) {
-    const removeButton = event.target.closest('.remove-button')
-    if (removeButton) {
-        removeItem(removeButton.closest('.archive-item'))
-        return
-    }
-
-    const link = event.target.closest('.item-title')
-    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey
-        || event.shiftKey || event.altKey) return
-
+    const item = event.target.closest('.archive-item')
+    if (!item || event.button > 1) return
     event.preventDefault()
-    runtime.sendMessage({
-        message: 'open',
-        data:    {
-            url:        link.href,
-            currentTab: false,
-            active:     true,
-            isArchive:  true,
-        },
-    })
-}
+    selectItem(item, lastInputType === 'keyboard' ? 'keyboard' : 'mouse')
 
-function handleShortcut (event) {
-    if (event.metaKey || event.ctrlKey || event.altKey) return
-
-    const search = $('#archiveSearch')
-    const active = document.activeElement
-    const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(active?.tagName)
-
-    if (event.key === 'Escape') {
-        if (search.value || selectedSite) {
-            search.value = ''
-            selectedSite = ''
-            applyFilter()
-        }
-        if (isTyping) search.blur()
-        return
-    }
-
-    if (isTyping) {
-        if (event.key === 'ArrowDown' || event.key === 'Enter') {
-            const first = $('.item-title')
-            if (first) {
-                event.preventDefault()
-                first.focus()
-            }
-        }
-        return
-    }
-
-    const item = active?.closest('.archive-item')
-
-    switch (event.key) {
-    case '/':
-        event.preventDefault()
-        search.focus()
-        search.select()
-        break
-    case 'j':
-    case 'ArrowDown':
-        event.preventDefault()
-        moveFocus(item, 1)
-        break
-    case 'k':
-    case 'ArrowUp':
-        event.preventDefault()
-        moveFocus(item, -1)
-        break
-    case 'x':
-    case 'Delete':
-    case 'Backspace':
-        if (!item) return
-        event.preventDefault()
+    if (event.target.dataset.deleteAction) {
         removeItem(item)
-        break
-    case 'u':
-        if (removedPage) undoRemove()
-        break
+    } else {
+        const background = event.button === 1 || event.metaKey || event.ctrlKey
+        openActive({ active: !background })
     }
-}
-
-function moveFocus (item, step) {
-    const links = [...document.querySelectorAll('.item-title')]
-    if (!links.length) return
-
-    const index = item ? links.indexOf(item.querySelector('.item-title')) : -1
-    const next = index === -1
-        ? (step > 0 ? 0 : links.length - 1)
-        : Math.min(links.length - 1, Math.max(0, index + step))
-    links[next].focus()
-    links[next].closest('.archive-item').scrollIntoView({ block: 'nearest' })
 }
 
 function applyFilter () {
     visibleCount = PAGE_SIZE
-    filteredPages = filterArchivePages(archivePages, getQuery(), selectedSite)
-    renderSites()
-    renderArchive()
+    filteredPages = filterArchivePages(archivePages, getQuery())
+    activeUrl = filteredPages[0]?.url
+    render()
+    window.scrollTo({ top: 0 })
 }
 
-function renderSites () {
-    const queryPages = filterArchivePages(archivePages, getQuery())
-    const sites = countSites(queryPages)
-    if (selectedSite && !sites.some(({ site }) => site === selectedSite)) {
-        sites.unshift({ site: selectedSite, count: 0 })
-    }
-
-    const shownSites = showAllSites ? sites : sites.slice(0, SITE_LIMIT)
-    const selectedHidden = selectedSite
-        && !shownSites.some(({ site }) => site === selectedSite)
-    if (selectedHidden) {
-        shownSites.push(sites.find(({ site }) => site === selectedSite))
-    }
-
-    const fragment = document.createDocumentFragment()
-    fragment.append(createSiteButton('', 'All', queryPages.length))
-    shownSites.forEach(({ site, count }) =>
-        fragment.append(createSiteButton(site, site, count)))
-
-    const hiddenCount = sites.length - shownSites.length
-    if (hiddenCount > 0) {
-        const item = document.createElement('li')
-        const more = document.createElement('button')
-        more.type = 'button'
-        more.className = 'site-more'
-        more.dataset.more = 'true'
-        more.textContent = `+${hiddenCount}`
-        more.title = `Show ${hiddenCount} more sites`
-        item.append(more)
-        fragment.append(item)
-    }
-
-    $('#siteList').replaceChildren(fragment)
-}
-
-function createSiteButton (site, label, count) {
-    const item = document.createElement('li')
-    const button = document.createElement('button')
-    button.type = 'button'
-    button.className = 'site-button'
-    button.dataset.site = site
-    button.setAttribute('aria-pressed', String(site === selectedSite))
-    button.title = label
-
-    if (site) {
-        const icon = createFavicon(`https://${site}`)
-        icon.className = 'site-icon'
-        button.append(icon)
-    } else {
-        const icon = document.createElement('span')
-        icon.className = 'site-icon site-icon-all'
-        button.append(icon)
-    }
-
-    const name = document.createElement('span')
-    name.className = 'site-name'
-    name.textContent = label
-
-    const total = document.createElement('span')
-    total.className = 'site-count'
-    total.textContent = count.toLocaleString()
-
-    button.append(name, total)
-    item.append(button)
-    return item
-}
-
-function renderArchive () {
+function render () {
     const query = getQuery()
-    const visiblePages = filteredPages.slice(0, visibleCount)
     const fragment = document.createDocumentFragment()
+    filteredPages.slice(0, visibleCount)
+        .forEach(page => fragment.append(createItem(page, query)))
+    list().replaceChildren(fragment)
 
-    for (const group of groupArchivePages(visiblePages)) {
-        const section = document.createElement('section')
-        section.className = 'archive-group'
-
-        const heading = document.createElement('h2')
-        heading.className = 'group-heading'
-        heading.textContent = group.label
-
-        const list = document.createElement('ol')
-        list.className = 'archive-list'
-        group.pages.forEach(page =>
-            list.append(createArchiveItem(page, group.kind, query)))
-
-        section.append(heading, list)
-        fragment.append(section)
-    }
-
-    $('#archiveGroups').replaceChildren(fragment)
+    const item = items().find(li => li.dataset.url === activeUrl) || items()[0]
+    if (item) selectItem(item, lastInputType, { scroll: false })
     updateEmptyState(query)
-    updateCounts()
+    updateCount()
 }
 
-function createFavicon (url, fallbackSrc = '') {
+function createItem (page, query) {
+    const item = document.createElement('li')
+    item.className = 'archive-item'
+    item.dataset.url = page.url
+
     const favicon = document.createElement('img')
-    const src = getSiteFaviconUrl(url) || fallbackSrc
-    if (src) favicon.src = src
-    favicon.dataset.faviconFallback = getSiteFaviconFallbackUrl(url)
-    favicon.addEventListener('error', () => applyFaviconFallback(favicon))
+    const faviconSrc = getSiteFaviconUrl(page.url) || page.favIconUrl
+    if (faviconSrc) favicon.src = faviconSrc
+    favicon.dataset.faviconFallback = getSiteFaviconFallbackUrl(page.url)
+    favicon.addEventListener('error', () => {
+        if (!favicon.dataset.deleteAction) applyFaviconFallback(favicon)
+    })
     favicon.alt = ''
     favicon.loading = 'lazy'
-    return favicon
+
+    const text = document.createElement('div')
+    text.className = 'item-text'
+
+    const title = document.createElement('a')
+    title.className = 'item-title'
+    title.href = page.url
+    title.tabIndex = -1
+    title.dataset.tooltipDelay = TITLE_TOOLTIP_DELAY
+    if (!page.title || page.title === page.url) title.classList.add('url-only')
+    appendHighlighted(title, page.title || page.url, query)
+
+    const url = document.createElement('span')
+    url.className = 'item-url'
+    appendHighlighted(url, getDisplayUrl(page.url), query)
+
+    text.append(title, url)
+    item.append(favicon, text)
+
+    const progress = getArchiveProgress(page)
+    if (progress) {
+        const percent = document.createElement('span')
+        percent.className = `percent ${progress.type}`
+        percent.textContent = progress.label
+        item.append(percent)
+    }
+
+    const date = new Date(page.date)
+    const time = document.createElement('time')
+    time.className = 'item-time'
+    time.dateTime = date.toISOString()
+    time.textContent = date.getFullYear() === thisYear
+        ? shortDate.format(date)
+        : longDate.format(date)
+    time.dataset.tooltip = fullDate.format(date)
+    item.append(time)
+
+    return item
 }
 
 function appendHighlighted (element, text, query) {
@@ -310,65 +266,92 @@ function appendHighlighted (element, text, query) {
     }
 }
 
-function createArchiveItem (page, groupKind, query) {
-    const item = document.createElement('li')
-    item.className = 'archive-item'
-    item.dataset.url = page.url
-
-    const favicon = createFavicon(page.url, page.favIconUrl)
-    favicon.className = 'item-favicon'
-
-    const main = document.createElement('div')
-    main.className = 'item-main'
-
-    const link = document.createElement('a')
-    link.className = 'item-title'
-    link.href = page.url
-    link.target = '_blank'
-    link.rel = 'noreferrer'
-    appendHighlighted(link, page.title || page.url, query)
-
-    const meta = document.createElement('div')
-    meta.className = 'item-meta'
-
-    const url = document.createElement('span')
-    url.className = 'item-url'
-    url.title = page.url
-    appendHighlighted(url, getDisplayUrl(page.url), query)
-    meta.append(url)
-
-    const progress = getArchiveProgress(page)
-    if (progress) {
-        const progressLabel = document.createElement('span')
-        progressLabel.className = `item-progress ${progress.type}`
-        progressLabel.title = progress.label
-        progressLabel.style.setProperty('--progress', `${progress.percent}%`)
-        progressLabel.textContent = `${progress.percent}%`
-        meta.append(progressLabel)
+function selectItem (item, inputType = 'keyboard', { scroll = true } = {}) {
+    if (!item) return
+    const previous = activeItem()
+    if (previous && previous !== item) {
+        hideTooltipWithin(previous)
+        restoreFavicon(previous)
+        previous.classList.remove('active')
     }
 
-    main.append(link, meta)
+    item.classList.add('active')
+    activeUrl = item.dataset.url
+    lastInputType = inputType
+    restoreFavicon(item)
+    if (shouldShowDeleteIcon(options.selectedItemIconMode ?? 'always', inputType)) {
+        showDeleteIcon(item)
+    }
+    if (scroll && inputType !== 'mouse') item.scrollIntoView({ block: 'nearest' })
+    updateCount()
+}
 
-    const time = document.createElement('time')
-    time.className = 'item-time'
-    time.dateTime = new Date(page.date).toISOString()
-    time.title = fullFormatter.format(page.date)
-    time.textContent = groupKind === 'day'
-        ? timeFormatter.format(page.date)
-        : dayFormatter.format(page.date)
+function showDeleteIcon (item) {
+    const image = item.querySelector('img')
+    if (!image.dataset.faviconSrc) image.dataset.faviconSrc = image.src
+    image.dataset.deleteAction = 'true'
+    image.src = DELETE_ICON
+}
 
-    const removeButton = document.createElement('button')
-    removeButton.className = 'remove-button'
-    removeButton.type = 'button'
-    removeButton.tabIndex = -1
-    removeButton.title = 'Remove (x)'
-    removeButton.setAttribute('aria-label',
-        `Remove ${page.title || getSiteName(page.url)}`)
-    removeButton.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">'
-        + '<path d="m4.5 4.5 7 7m0-7-7 7"/></svg>'
+function restoreFavicon (item) {
+    const image = item.querySelector('img')
+    if (!image?.dataset.deleteAction) return
+    image.src = image.dataset.faviconSrc
+    delete image.dataset.deleteAction
+}
 
-    item.append(favicon, main, time, removeButton)
-    return item
+function moveTo (direction) {
+    const all = items()
+    if (!all.length) return
+    const index = all.indexOf(activeItem())
+    const next = {
+        previous: Math.max(0, index - 1),
+        next:     Math.min(all.length - 1, index + 1),
+        top:      0,
+        bottom:   all.length - 1,
+    }[direction]
+
+    // G goes to the real end, so load every remaining item first.
+    if (direction === 'bottom' && visibleCount < filteredPages.length) {
+        visibleCount = filteredPages.length
+        activeUrl = filteredPages.at(-1).url
+        lastInputType = 'keyboard'
+        render()
+        activeItem()?.scrollIntoView({ block: 'nearest' })
+        return
+    }
+    selectItem(all[next], 'keyboard')
+}
+
+function openActive ({ active }) {
+    const url = activeItem()?.dataset.url
+    if (!url) return
+    runtime.sendMessage({
+        message: 'open',
+        data:    { url, currentTab: false, active, isArchive: true },
+    })
+}
+
+async function copyActiveUrl () {
+    const item = activeItem()
+    if (!item) return
+    await navigator.clipboard.writeText(item.dataset.url)
+    item.animate([{ opacity: 1 }, { opacity: 0.3 }, { opacity: 1 }],
+        { duration: 300, iterations: 2 })
+}
+
+function focusSearch () {
+    const search = $('#archiveSearch')
+    search.focus()
+    search.select()
+}
+
+function openOptions () {
+    location.href = '../options/options.html'
+}
+
+function openHelp () {
+    window.open(HELP_URL)
 }
 
 async function removeItem (item) {
@@ -376,53 +359,47 @@ async function removeItem (item) {
     const page = archivePages.find(({ url }) => url === item.dataset.url)
     if (!page) return
 
-    const hadFocus = item.contains(document.activeElement)
-    const links = [...document.querySelectorAll('.item-title')]
-    const index = links.indexOf(item.querySelector('.item-title'))
     item.dataset.removing = 'true'
-    item.classList.add('is-removing')
+    const all = items()
+    const index = all.indexOf(item)
+    const neighbor = all[index + 1] || all[index - 1]
 
     try {
         await storage.local.remove(page.url)
+        await item.animate([{ opacity: 1 }, { opacity: 0 }],
+            { duration: 150, easing: 'ease-out' }).finished
         archivePages = archivePages.filter(({ url }) => url !== page.url)
-        removedPage = page
-        const keepCount = visibleCount
-        filteredPages = filterArchivePages(archivePages, getQuery(), selectedSite)
-        visibleCount = keepCount
-        renderSites()
-        renderArchive()
+        filteredPages = filteredPages.filter(({ url }) => url !== page.url)
+        removedPages.push(page)
+        activeUrl = neighbor?.dataset.url
+        render()
         showUndoToast()
-
-        if (hadFocus) {
-            const nextLinks = document.querySelectorAll('.item-title')
-            nextLinks[Math.min(index, nextLinks.length - 1)]?.focus()
-        }
     } catch (error) {
         console.error('Read Later: unable to remove the archived item.', error)
         delete item.dataset.removing
-        item.classList.remove('is-removing')
         setPageStatus('Could not remove this item.', 'error')
     }
 }
 
 async function undoRemove () {
-    if (!removedPage) return
-
-    const page = removedPage
-    $('#undoRemove').disabled = true
+    const page = removedPages.pop()
+    if (!page) return
 
     try {
         await storage.local.set(page)
-        archivePages = [...archivePages, page]
-            .sort((a, b) => b.date - a.date)
-        removedPage = undefined
-        hideUndoToast()
-        applyFilter()
+        archivePages = [...archivePages, page].sort((a, b) => b.date - a.date)
+        filteredPages = filterArchivePages(archivePages, getQuery())
+        const index = filteredPages.indexOf(page)
+        if (index >= visibleCount) visibleCount = index + 1
+        activeUrl = page.url
+        lastInputType = 'keyboard'
+        render()
+        activeItem()?.scrollIntoView({ block: 'nearest' })
+        if (!removedPages.length) hideUndoToast()
     } catch (error) {
+        removedPages.push(page)
         console.error('Read Later: unable to restore the archived item.', error)
         setPageStatus('Could not restore this item.', 'error')
-    } finally {
-        $('#undoRemove').disabled = false
     }
 }
 
@@ -431,10 +408,7 @@ function showUndoToast () {
     const toast = $('#undoToast')
     toast.hidden = false
     requestAnimationFrame(() => toast.classList.add('visible'))
-    undoTimer = setTimeout(() => {
-        removedPage = undefined
-        hideUndoToast()
-    }, UNDO_DURATION)
+    undoTimer = setTimeout(hideUndoToast, UNDO_DURATION)
 }
 
 function hideUndoToast () {
@@ -443,36 +417,42 @@ function hideUndoToast () {
     toast.classList.remove('visible')
     setTimeout(() => {
         if (!toast.classList.contains('visible')) toast.hidden = true
-    }, 180)
+    }, 160)
 }
 
-function updateCounts () {
-    const total = archivePages.length
-    const count = $('#archiveCount')
-    count.textContent = total.toLocaleString()
-    count.title = `${total.toLocaleString()} ${total === 1 ? 'item' : 'items'}`
-    document.title = `Archive (${total}) · Read Later`
+function updateCount () {
+    const total = filteredPages.length
+    const row = items().indexOf(activeItem()) + 1
+    const separator = countSeparators[options.countFormat ?? 'slash']
+    const count = $('#count')
+
+    $('#row').textContent = row
+    $('#total').textContent = total
+    count.dataset.format = separator ? 'position' : 'total'
+    count.querySelector('.count-separator').textContent = separator ?? ''
+
+    const label = separator ? `Item ${row} of ${total}` : `${total} items`
+    count.dataset.tooltip = label
+    count.setAttribute('aria-label', label)
+    document.title = `Archive (${archivePages.length}) · Read Later`
 }
 
 function updateEmptyState (query) {
     const isEmpty = filteredPages.length === 0
-    const isFiltered = Boolean(query.trim() || selectedSite)
     $('#emptyState').hidden = !isEmpty
-    $('#clearFilters').hidden = !isFiltered
     if (!isEmpty) return
 
-    $('#emptyTitle').textContent = isFiltered
+    $('#emptyTitle').textContent = query.trim()
         ? 'No matching items'
         : 'Archive is empty'
-    $('#emptyMessage').textContent = isFiltered
-        ? 'Try another title, URL, or site.'
+    $('#emptyMessage').textContent = query.trim()
+        ? 'Try another title or URL.'
         : 'Items you save will appear here.'
 }
 
 function showLoadError () {
-    $('#archiveCount').textContent = ''
-    $('#emptyState').hidden = true
     $('#archiveSearch').disabled = true
+    $('#emptyState').hidden = true
     setPageStatus('The archive could not be loaded. Reload this page to try again.', 'error')
 }
 
