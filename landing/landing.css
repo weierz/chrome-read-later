@@ -163,6 +163,29 @@ em {
     transition: background-color 120ms ease, border-color 120ms ease;
 }
 
+.btn-icon {
+    flex: none;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.btn-small .btn-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 7px;
+}
+
+.svg-library {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
 .btn-small {
     min-height: 36px;
     padding: 0 14px;
