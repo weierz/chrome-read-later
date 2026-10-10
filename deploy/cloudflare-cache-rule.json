@@ -1,0 +1,16 @@
+{
+  "description": "readlater.weierz.com: follow the origin's Cache-Control so a deploy shows up at once. Add to the weierz.com zone's http_request_cache_settings ruleset next to the weierz.com rules.",
+  "ref": "readlater_respect_origin",
+  "expression": "(http.host eq \"readlater.weierz.com\")",
+  "action": "set_cache_settings",
+  "action_parameters": {
+    "cache": true,
+    "edge_ttl": {
+      "mode": "respect_origin"
+    },
+    "browser_ttl": {
+      "mode": "respect_origin"
+    }
+  },
+  "enabled": true
+}
