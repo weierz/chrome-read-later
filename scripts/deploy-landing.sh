@@ -22,6 +22,11 @@ set -euo pipefail
 root=$1
 release=$2
 test -s "$root/releases/$release/index.html"
+# Cloudflare may keep styles and scripts in browsers for hours; a new URL per
+# release makes the page always load the files deployed with it.
+sed -i -e "s|landing/landing.css\"|landing/landing.css?v=$release\"|" \
+  -e "s|landing/landing.js\"|landing/landing.js?v=$release\"|" \
+  "$root/releases/$release/index.html"
 ln -s "releases/$release" "$root/current-$release"
 mv -Tf "$root/current-$release" "$root/current"
 REMOTE
