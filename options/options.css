@@ -1,5 +1,6 @@
 @import "../modules/styles/theme.css";
 @import "../modules/styles/tooltip.css";
+@import "../modules/styles/frame.css";
 
 * {
     box-sizing: border-box;
@@ -62,96 +63,6 @@ button:disabled {
     background: var(--surface-subtle);
 }
 
-.settings-app {
-    display: grid;
-    grid-template-columns: 272px minmax(0, 1fr);
-    min-height: 100vh;
-}
-
-.sidebar {
-    position: sticky;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    padding: 28px 18px 22px;
-    border-right: 1px solid var(--border);
-    background: var(--surface);
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 8px 30px;
-    color: var(--text);
-    text-decoration: none;
-}
-
-.brand img {
-    width: 38px;
-    height: 38px;
-}
-
-.brand strong,
-.brand small {
-    display: block;
-}
-
-.brand strong {
-    font-size: 16px;
-    line-height: 1.25;
-}
-
-.brand small {
-    margin-top: 2px;
-    color: var(--muted);
-    font-size: 12px;
-}
-
-.sidebar-nav {
-    display: grid;
-    gap: 4px;
-}
-
-.sidebar-link {
-    position: relative;
-    display: block;
-    padding: 10px 12px;
-    border-radius: 8px;
-    color: var(--text);
-    text-decoration: none;
-}
-
-.sidebar-link:hover {
-    background: var(--surface-subtle);
-}
-
-.sidebar-link.active {
-    background: var(--accent-soft);
-    color: var(--accent-hover);
-}
-
-.sidebar-link span {
-    display: block;
-    font-weight: 650;
-}
-
-.content {
-    width: min(720px, calc(100% - 64px));
-    margin: 0 auto;
-    padding: 40px 0 80px;
-}
-
-.visually-hidden {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-}
 
 
 h1,
@@ -484,54 +395,6 @@ input:disabled {
 @media (max-width: 860px) {
     html {
         scroll-padding-top: 150px;
-    }
-
-    .settings-app {
-        display: block;
-    }
-
-    .sidebar {
-        position: sticky;
-        z-index: 10;
-        height: auto;
-        padding: 14px 18px 12px;
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
-    }
-
-    .brand {
-        margin: 0 0 12px;
-    }
-
-    .brand img {
-        width: 30px;
-        height: 30px;
-    }
-
-    .sidebar-nav {
-        display: flex;
-        gap: 4px;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .sidebar-nav::-webkit-scrollbar {
-        display: none;
-    }
-
-    .sidebar-link {
-        flex: 0 0 auto;
-        padding: 7px 10px;
-        border: 1px solid transparent;
-    }
-
-    .sidebar-link.active {
-        border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
-    }
-
-    .content {
-        width: min(100% - 32px, 720px);
-        padding: 28px 0 64px;
     }
 }
 
